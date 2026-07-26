@@ -39,9 +39,6 @@ const setTokenCookies = (req, res, accessToken, refreshToken) => {
     res.cookie("client_accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
     res.cookie("client_refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
   }
-  // Also set general fallback token for single-app compatibility
-  res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
-  res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
 };
 
 const clearTokenCookies = (req, res) => {

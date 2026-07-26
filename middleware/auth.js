@@ -6,10 +6,14 @@ const User = require("../modules/user/user.model");
 const isAdminRequest = (req) => {
   const origin = req.headers.origin || req.headers.referer || "";
   const adminUrl = env.ADMIN_URL || "http://localhost:4001";
+  const appContext = req.headers["x-app-context"];
+
+  if (appContext === "admin") return true;
+  if (appContext === "client") return false;
+
   return (
     (origin && origin.includes(adminUrl)) ||
-    (origin && origin.includes(":4001")) ||
-    req.headers["x-app-context"] === "admin"
+    (origin && origin.includes(":4001"))
   );
 };
 
@@ -22,9 +26,6 @@ const getAccessTokenFromReq = (req) => {
     }
     if (!isAdmin && req.cookies.client_accessToken) {
       return req.cookies.client_accessToken;
-    }
-    if (req.cookies.accessToken) {
-      return req.cookies.accessToken;
     }
   }
 
