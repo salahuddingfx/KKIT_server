@@ -2,11 +2,14 @@ const Payment = require("./payment.model");
 const Invoice = require("../invoice/invoice.model");
 const Enrollment = require("../enrollment/enrollment.model");
 const Course = require("../course/course.model");
+const User = require("../user/user.model");
 const ApiError = require("../../utils/apiError");
 const { paginate } = require("../../utils/pagination");
 const { generateInvoiceNumber } = require("../../utils/helpers");
 const { PAYMENT_STATUS } = require("../../utils/constants");
 const { emitEvent } = require("../gamification/gamification.service");
+const { generateInvoicePDF } = require("../../services/pdf/invoice.pdf");
+const { sendEmail } = require("../../services/email/email.service");
 
 const getAllPayments = async (query, options) => {
   const filter = {};
@@ -155,6 +158,49 @@ const finalizePayment = async (payment) => {
 
   // Increment enrolledStudents on course
   await Course.findByIdAndUpdate(payment.course, { $inc: { enrolledStudents: 1 } });
+
+  // Send Email Confirmation with Attached Invoice PDF
+  try {
+    const userObj =
+      typeof payment.user === "object" && payment.user?.email
+        ? payment.user
+        : await User.findById(payment.user);
+    const courseObj =
+      typeof payment.course === "object" && payment.course?.title
+        ? payment.course
+        : await Course.findById(payment.course);
+
+    if (userObj && userObj.email) {
+      const pdfBuffer = await generateInvoicePDF(invoice, [
+        {
+          description: courseObj ? courseObj.title : "Course Enrollment",
+          amount: payment.amount,
+        },
+      ]);
+
+      await sendEmail({
+        to: userObj.email,
+        subject: `Payment Confirmation & Invoice - ${courseObj ? courseObj.title : "KKIT Course"}`,
+        template: "paymentSuccess",
+        data: {
+          name: userObj.name || "Student",
+          amount: payment.amount,
+          courseName: courseObj ? courseObj.title : "Course Enrollment",
+          transactionId: payment.transactionId || invoice.invoiceNumber,
+          date: new Date().toLocaleDateString("en-BD"),
+        },
+        attachments: [
+          {
+            filename: `Invoice-${invoice.invoiceNumber}.pdf`,
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ],
+      });
+    }
+  } catch (emailErr) {
+    console.error("Failed to send payment confirmation email:", emailErr);
+  }
 };
 
 const handleWebhook = async (provider, payload) => {
