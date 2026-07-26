@@ -2,22 +2,32 @@ const { z } = require("zod");
 
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  phone: z.string().optional(),
-  bio: z.string().max(500).optional(),
-  designation: z.string().max(100).optional(),
-  address: z.object({
-    street: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    zipCode: z.string().optional(),
-    country: z.string().optional(),
-  }).optional(),
-  socialLinks: z.object({
-    facebook: z.string().url().optional().or(z.literal("")),
-    linkedin: z.string().url().optional().or(z.literal("")),
-    twitter: z.string().url().optional().or(z.literal("")),
-    github: z.string().url().optional().or(z.literal("")),
-  }).optional(),
+  phone: z.string().optional().nullable(),
+  bio: z.string().max(500).optional().nullable(),
+  designation: z.string().max(100).optional().nullable(),
+  address: z
+    .union([
+      z.string(),
+      z.object({
+        street: z.string().optional().nullable(),
+        city: z.string().optional().nullable(),
+        state: z.string().optional().nullable(),
+        zipCode: z.string().optional().nullable(),
+        country: z.string().optional().nullable(),
+      }),
+    ])
+    .optional()
+    .nullable(),
+  socialLinks: z
+    .object({
+      facebook: z.string().optional().nullable(),
+      linkedin: z.string().optional().nullable(),
+      twitter: z.string().optional().nullable(),
+      github: z.string().optional().nullable(),
+      website: z.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
 });
 
 const changeRoleSchema = z.object({
