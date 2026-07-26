@@ -46,6 +46,7 @@ const emailCampaignRoutes = require("../modules/email-campaign/email-campaign.ro
 const revenueAnalyticsRoutes = require("../modules/revenue-analytics/revenue-analytics.routes");
 const gamificationRoutes = require("../modules/gamification/gamification.routes");
 const roleRoutes = require("../modules/role/role.routes");
+const serviceOrderRoutes = require("../modules/service-order/service-order.routes");
 
 router.use("/health", healthRoutes);
 router.use("/docs", apiDocsRoutes);
@@ -59,6 +60,7 @@ router.use("/payments", paymentRoutes);
 router.use("/invoices", invoiceRoutes);
 router.use("/blogs", blogRoutes);
 router.use("/services", serviceRoutes);
+router.use("/service-orders", serviceOrderRoutes);
 router.use("/pricing", pricingRoutes);
 router.use("/portfolio", portfolioRoutes);
 router.use("/team", teamRoutes);

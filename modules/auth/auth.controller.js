@@ -10,6 +10,7 @@ const ACCESS_COOKIE_OPTIONS = {
   secure: isProd,
   sameSite: isProd ? "none" : "lax",
   maxAge: 5 * 60 * 60 * 1000, // 5 hours
+  path: "/",
 };
 
 const REFRESH_COOKIE_OPTIONS = {
@@ -39,6 +40,8 @@ const setTokenCookies = (req, res, accessToken, refreshToken) => {
     res.cookie("client_accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
     res.cookie("client_refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
   }
+  res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
+  res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
 };
 
 const clearTokenCookies = (req, res) => {
@@ -67,7 +70,7 @@ const verifyRegister = catchAsync(async (req, res) => {
   };
   const { user, accessToken, refreshToken } = await authService.verifyRegister(verifyData);
   setTokenCookies(req, res, accessToken, refreshToken);
-  ApiResponse.success(res, { user: { _id: user._id, name: user.name, email: user.email, role: user.role } });
+  ApiResponse.success(res, { user: { _id: user._id, name: user.name, email: user.email, role: user.role }, accessToken, refreshToken });
 });
 
 const login = catchAsync(async (req, res) => {
@@ -79,7 +82,7 @@ const login = catchAsync(async (req, res) => {
   const result = await authService.login(loginData);
   if (!result.otpRequired && result.accessToken) {
     setTokenCookies(req, res, result.accessToken, result.refreshToken);
-    ApiResponse.success(res, { user: { _id: result.user._id, name: result.user.name, email: result.user.email, role: result.user.role } });
+    ApiResponse.success(res, { user: { _id: result.user._id, name: result.user.name, email: result.user.email, role: result.user.role }, accessToken: result.accessToken, refreshToken: result.refreshToken });
   } else {
     ApiResponse.success(res, result);
   }
@@ -93,7 +96,7 @@ const verifyLogin = catchAsync(async (req, res) => {
   };
   const { user, accessToken, refreshToken, deviceInfo } = await authService.verifyLogin(verifyData);
   setTokenCookies(req, res, accessToken, refreshToken);
-  ApiResponse.success(res, { user: { _id: user._id, name: user.name, email: user.email, role: user.role }, deviceInfo });
+  ApiResponse.success(res, { user: { _id: user._id, name: user.name, email: user.email, role: user.role }, accessToken, refreshToken, deviceInfo });
 });
 
 const refresh = catchAsync(async (req, res) => {

@@ -1,9 +1,12 @@
 const rateLimit = require("express-rate-limit");
 
-// General API rate limiter: 60 requests per minute per IP
+const isDev = process.env.NODE_ENV !== "production";
+
+// General API rate limiter: relaxed in development
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 60,
+  max: isDev ? 2000 : 60,
+  skip: () => isDev,
   message: {
     success: false,
     message: "Too many requests, please try again later.",
@@ -12,10 +15,11 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Strict limiter for auth routes: 10 requests per minute per IP
+// Strict limiter for auth routes: relaxed in development
 const authLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 10,
+  max: isDev ? 500 : 10,
+  skip: () => isDev,
   message: {
     success: false,
     message: "Too many authentication attempts, please try again later.",
@@ -24,10 +28,11 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Contact/form limiter: 5 requests per minute per IP
+// Contact/form limiter: relaxed in development
 const formLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 5,
+  max: isDev ? 100 : 5,
+  skip: () => isDev,
   message: {
     success: false,
     message: "Too many form submissions, please try again later.",
