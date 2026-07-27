@@ -197,6 +197,17 @@ const finalizePayment = async (payment) => {
           },
         ],
       });
+
+      // Send SMS Confirmation if user phone or billing phone exists
+      const targetPhone = userObj.phone || payment.billingDetails?.phone;
+      if (targetPhone) {
+        const { sendEnrollmentSMS } = require("../../services/sms/sms.service");
+        sendEnrollmentSMS({
+          to: targetPhone,
+          courseTitle: courseObj ? courseObj.title : "Course",
+          studentName: userObj.name,
+        }).catch((smsErr) => console.error("Failed to send enrollment SMS:", smsErr));
+      }
     }
   } catch (emailErr) {
     console.error("Failed to send payment confirmation email:", emailErr);

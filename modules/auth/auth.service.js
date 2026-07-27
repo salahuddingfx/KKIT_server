@@ -4,6 +4,7 @@ const User = require("../user/user.model");
 const ApiError = require("../../utils/apiError");
 const env = require("../../config/env");
 const { sendEmail } = require("../../services/email/email.service");
+const { sendOtpSMS } = require("../../services/sms/sms.service");
 const deviceService = require("../device/device.service");
 
 const register = async (data) => {
@@ -34,7 +35,11 @@ const register = async (data) => {
       },
     }).catch(() => {});
     
-    return { email: existingUser.email, isEmailVerified: false, message: "OTP verification code sent to email" };
+    if (existingUser.phone) {
+      sendOtpSMS({ to: existingUser.phone, otp }).catch(() => {});
+    }
+
+    return { email: existingUser.email, isEmailVerified: false, message: "OTP verification code sent to email/phone" };
   }
 
   const user = await User.create({
@@ -61,7 +66,11 @@ const register = async (data) => {
     },
   }).catch(() => {});
 
-  return { email: user.email, isEmailVerified: false, message: "OTP verification code sent to email" };
+  if (user.phone) {
+    sendOtpSMS({ to: user.phone, otp }).catch(() => {});
+  }
+
+  return { email: user.email, isEmailVerified: false, message: "OTP verification code sent to email/phone" };
 };
 
 const verifyRegister = async ({ email, otp, fingerprint, ip, userAgent }) => {
@@ -158,7 +167,11 @@ const login = async ({ email, password, fingerprint, ip, userAgent }) => {
     },
   }).catch(() => {});
 
-  return { otpRequired: true, email: user.email, message: "Verification code sent to email" };
+  if (user.phone) {
+    sendOtpSMS({ to: user.phone, otp }).catch(() => {});
+  }
+
+  return { otpRequired: true, email: user.email, message: "Verification code sent to email/phone" };
 };
 
 const verifyLogin = async ({ email, otp, fingerprint, ip, userAgent }) => {
@@ -257,6 +270,10 @@ const forgotPassword = async (email) => {
   }).catch((err) => {
     console.error("Failed to send OTP email:", err);
   });
+
+  if (user.phone) {
+    sendOtpSMS({ to: user.phone, otp }).catch(() => {});
+  }
 
   return { message: "If the email exists, a verification code has been sent" };
 };

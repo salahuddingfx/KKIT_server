@@ -31,4 +31,11 @@ module.exports = {
   BKASH_PASSWORD: process.env.BKASH_PASSWORD,
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:4000",
   ADMIN_URL: process.env.ADMIN_URL || "http://localhost:4001",
+  SMS_ENABLED: process.env.SMS_ENABLED !== "false",
+  SMS_PROVIDER: (process.env.SMS_PROVIDER || "bulksmsbd").toLowerCase(),
+  SMS_API_KEY: process.env.SMS_API_KEY,
+  SMS_SENDER_ID: process.env.SMS_SENDER_ID || "KKIT",
+  SMS_API_URL: process.env.SMS_API_URL,
+  SMS_USERNAME: process.env.SMS_USERNAME,
+  SMS_PASSWORD: process.env.SMS_PASSWORD,
 };

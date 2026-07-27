@@ -72,6 +72,23 @@ const updateOrderStatus = async (id, data) => {
   }
 
   await order.save();
+
+  // Send SMS update to customer if phone number exists
+  try {
+    const populatedOrder = await ServiceOrder.findById(id).populate("user", "name email phone");
+    if (populatedOrder && populatedOrder.user && populatedOrder.user.phone) {
+      const { sendOrderSMS } = require("../../services/sms/sms.service");
+      sendOrderSMS({
+        to: populatedOrder.user.phone,
+        orderNumber: order.orderNumber,
+        status: data.projectStatus || data.paymentStatus || order.projectStatus,
+        totalAmount: order.totalAmount,
+      }).catch(() => {});
+    }
+  } catch (e) {
+    // Non-blocking
+  }
+
   return order;
 };
 

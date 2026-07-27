@@ -177,6 +177,10 @@ const endpoints = [
   { method: "GET", path: "/api/v1/devices", auth: true, description: "List my device sessions", group: "Devices" },
   { method: "DELETE", path: "/api/v1/devices/:id", auth: true, description: "Remove a device session", group: "Devices" },
 
+  // ── SMS ──
+  { method: "GET", path: "/api/v1/sms/status", auth: true, role: "admin", description: "Get SMS Gateway configuration & mode status", group: "SMS" },
+  { method: "POST", path: "/api/v1/sms/send-test", auth: true, role: "admin", description: "Send a test SMS message (Admin only)", body: ["to", "message?"], group: "SMS" },
+
   // ── Dashboard ──
   { method: "GET", path: "/api/v1/dashboard/stats", auth: true, role: "admin", description: "Get admin dashboard stats", group: "Dashboard" },
 ];

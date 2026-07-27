@@ -47,6 +47,7 @@ const revenueAnalyticsRoutes = require("../modules/revenue-analytics/revenue-ana
 const gamificationRoutes = require("../modules/gamification/gamification.routes");
 const roleRoutes = require("../modules/role/role.routes");
 const serviceOrderRoutes = require("../modules/service-order/service-order.routes");
+const smsRoutes = require("../modules/sms/sms.routes");
 
 router.use("/health", healthRoutes);
 router.use("/docs", apiDocsRoutes);
@@ -61,6 +62,7 @@ router.use("/invoices", invoiceRoutes);
 router.use("/blogs", blogRoutes);
 router.use("/services", serviceRoutes);
 router.use("/service-orders", serviceOrderRoutes);
+router.use("/sms", smsRoutes);
 router.use("/pricing", pricingRoutes);
 router.use("/portfolio", portfolioRoutes);
 router.use("/team", teamRoutes);
