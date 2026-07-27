@@ -38,6 +38,7 @@ const partnerRoutes = require("../modules/partner/partner.routes");
 const homeStatRoutes = require("../modules/home-stat/home-stat.routes");
 const offerRoutes = require("../modules/offer/offer.routes");
 const healthRoutes = require("../modules/health/health.routes");
+const eventsRoutes = require("../modules/events/events.routes");
 const apiDocsRoutes = require("../modules/api-docs/api-docs.routes");
 const liveClassRoutes = require("../modules/live-class/live-class.routes");
 const learningPathRoutes = require("../modules/learning-path/learning-path.routes");
@@ -97,5 +98,6 @@ router.use("/discussions", discussionRoutes);
 router.use("/email-campaigns", emailCampaignRoutes);
 router.use("/revenue-analytics", revenueAnalyticsRoutes);
 router.use("/gamification", gamificationRoutes);
+router.use("/events", eventsRoutes);
 
 module.exports = router;
