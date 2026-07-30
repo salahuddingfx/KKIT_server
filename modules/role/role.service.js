@@ -118,6 +118,17 @@ const seedSystemRoles = async () => {
       const existing = await Role.findOne({ slug: sysRole.slug });
       if (!existing) {
         await Role.create(sysRole);
+      } else {
+        let updated = false;
+        if (!existing.allowedPages || existing.allowedPages.length === 0) {
+          existing.allowedPages = sysRole.allowedPages;
+          updated = true;
+        }
+        if (!existing.permissions || existing.permissions.length === 0) {
+          existing.permissions = sysRole.permissions;
+          updated = true;
+        }
+        if (updated) await existing.save();
       }
     }
   } catch (err) {

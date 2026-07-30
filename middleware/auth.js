@@ -5,7 +5,7 @@ const User = require("../modules/user/user.model");
 
 const isAdminRequest = (req) => {
   const origin = req.headers.origin || req.headers.referer || "";
-  const adminUrl = env.ADMIN_URL || "http://localhost:4001";
+  const adminUrl = env.ADMIN_URL || "https://admin.kkitbd.com";
   const appContext = req.headers["x-app-context"];
 
   if (appContext === "admin") return true;
@@ -13,7 +13,7 @@ const isAdminRequest = (req) => {
 
   return (
     (origin && origin.includes(adminUrl)) ||
-    (origin && origin.includes(":4001"))
+    (origin && (origin.includes("admin.kkitbd.com") || origin.includes(":4001")))
   );
 };
 
@@ -26,16 +26,12 @@ const getTokensFromReq = (req) => {
     tokens.push(req.headers.authorization.split(" ")[1]);
   }
 
-  // Priority 2: App context cookie
+  // Priority 2: App context specific cookie
   if (req.cookies) {
     if (isAdmin && req.cookies.admin_accessToken) {
       tokens.push(req.cookies.admin_accessToken);
     } else if (!isAdmin && req.cookies.client_accessToken) {
       tokens.push(req.cookies.client_accessToken);
-    }
-    // Priority 3: Fallback generic cookie
-    if (req.cookies.accessToken) {
-      tokens.push(req.cookies.accessToken);
     }
   }
 

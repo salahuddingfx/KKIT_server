@@ -6,6 +6,16 @@ const getAllTeam = async (query, options) => {
   const filter = {};
   if (query.status) filter.status = query.status;
   if (query.department) filter.department = query.department;
+  if (query.isDeveloper !== undefined) {
+    filter.isDeveloper = query.isDeveloper === "true" || query.isDeveloper === true;
+  }
+  if (query.search) {
+    filter.$or = [
+      { name: { $regex: query.search, $options: "i" } },
+      { designation: { $regex: query.search, $options: "i" } },
+      { department: { $regex: query.search, $options: "i" } },
+    ];
+  }
   return paginate(Team, filter, options);
 };
 

@@ -5,6 +5,19 @@ const lessonSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: String,
   videoUrl: String,
+  videoProvider: {
+    type: String,
+    enum: ["bunny", "cloudinary", "youtube", "vimeo", "hls", "mp4"],
+    default: "bunny",
+  },
+  bunnyLibraryId: String,
+  bunnyVideoId: String,
+  chapters: [
+    {
+      time: { type: Number, required: true },
+      label: { type: String, required: true },
+    },
+  ],
   duration: Number,
   order: { type: Number, default: 0 },
   isFree: { type: Boolean, default: false },

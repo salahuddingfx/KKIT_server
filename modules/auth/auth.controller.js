@@ -23,10 +23,10 @@ const REFRESH_COOKIE_OPTIONS = {
 
 const isAdminRequest = (req) => {
   const origin = req.headers.origin || req.headers.referer || "";
-  const adminUrl = env.ADMIN_URL || "http://localhost:4001";
+  const adminUrl = env.ADMIN_URL || "https://admin.kkitbd.com";
   return (
     (origin && origin.includes(adminUrl)) ||
-    (origin && origin.includes(":4001")) ||
+    (origin && (origin.includes("admin.kkitbd.com") || origin.includes(":4001"))) ||
     req.headers["x-app-context"] === "admin"
   );
 };
@@ -40,8 +40,9 @@ const setTokenCookies = (req, res, accessToken, refreshToken) => {
     res.cookie("client_accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
     res.cookie("client_refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
   }
-  res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
-  res.cookie("refreshToken", refreshToken, REFRESH_COOKIE_OPTIONS);
+  // Clear any legacy generic shared cookies to prevent cross-app session leaking
+  res.clearCookie("accessToken", { httpOnly: true, secure: isProd, sameSite: isProd ? "none" : "lax", path: "/" });
+  res.clearCookie("refreshToken", { httpOnly: true, secure: isProd, sameSite: isProd ? "none" : "lax", path: "/" });
 };
 
 const clearTokenCookies = (req, res) => {

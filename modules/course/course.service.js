@@ -74,12 +74,41 @@ const getCourseBySlug = async (slug) => {
   return course;
 };
 
+const sanitizeCourseData = (data) => {
+  const result = { ...data };
+  if (Array.isArray(result.mentors)) {
+    result.mentors = result.mentors
+      .map((m) => {
+        if (!m) return null;
+        const userId = typeof m === "object" ? (m.user?._id || m.user || m._id) : m;
+        return userId ? { user: userId } : null;
+      })
+      .filter(Boolean);
+  }
+  if (Array.isArray(result.trainers)) {
+    result.trainers = result.trainers
+      .map((t) => {
+        if (!t) return null;
+        const userId = typeof t === "object" ? (t.user?._id || t.user || t._id) : t;
+        return userId ? { user: userId } : null;
+      })
+      .filter(Boolean);
+  }
+  return result;
+};
+
 const createCourse = async (data) => {
-  return Course.create(data);
+  const sanitized = sanitizeCourseData(data);
+  return Course.create(sanitized);
 };
 
 const updateCourse = async (id, data) => {
-  const course = await Course.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+  const sanitized = sanitizeCourseData(data);
+  const course = await Course.findByIdAndUpdate(id, { $set: sanitized }, { new: true, runValidators: true })
+    .populate("instructor", "name email avatar designation")
+    .populate("mentors.user", "name email avatar designation")
+    .populate("trainers.user", "name email avatar designation")
+    .populate("category");
   if (!course) throw ApiError.notFound("Course not found");
   return course;
 };

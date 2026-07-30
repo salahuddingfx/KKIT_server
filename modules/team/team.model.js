@@ -38,6 +38,15 @@ const teamSchema = new mongoose.Schema(
       linkedin: String,
       twitter: String,
       github: String,
+      website: String,
+    },
+    skills: [String],
+    experience: String,
+    projects: Number,
+    highlights: [String],
+    isDeveloper: {
+      type: Boolean,
+      default: false,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
