@@ -47,10 +47,10 @@ const getAllCourses = async (query, options) => {
 const getCourseById = async (id) => {
   let course;
   try {
-    course = await Course.findById(id).populate("instructor", "name email avatar designation").populate("mentors.user", "name email avatar designation").populate("trainers.user", "name email avatar designation").populate("category");
+    course = await Course.findById(id).populate("instructor", "name email avatar designation bio role").populate("mentors.user", "name email avatar designation bio role").populate("trainers.user", "name email avatar designation bio role").populate("category");
   } catch (err) {
     if (err.name === "CastError") {
-      course = await Course.findById(id).populate("instructor", "name email avatar designation").populate("mentors.user", "name email avatar designation").populate("trainers.user", "name email avatar designation");
+      course = await Course.findById(id).populate("instructor", "name email avatar designation bio role").populate("mentors.user", "name email avatar designation bio role").populate("trainers.user", "name email avatar designation bio role");
     } else {
       throw err;
     }
@@ -62,10 +62,10 @@ const getCourseById = async (id) => {
 const getCourseBySlug = async (slug) => {
   let course;
   try {
-    course = await Course.findOne({ slug }).populate("instructor", "name email avatar designation").populate("mentors.user", "name email avatar designation").populate("trainers.user", "name email avatar designation").populate("category");
+    course = await Course.findOne({ slug }).populate("instructor", "name email avatar designation bio role").populate("mentors.user", "name email avatar designation bio role").populate("trainers.user", "name email avatar designation bio role").populate("category");
   } catch (err) {
     if (err.name === "CastError") {
-      course = await Course.findOne({ slug }).populate("instructor", "name email avatar designation").populate("mentors.user", "name email avatar designation").populate("trainers.user", "name email avatar designation");
+      course = await Course.findOne({ slug }).populate("instructor", "name email avatar designation bio role").populate("mentors.user", "name email avatar designation bio role").populate("trainers.user", "name email avatar designation bio role");
     } else {
       throw err;
     }
@@ -105,9 +105,9 @@ const createCourse = async (data) => {
 const updateCourse = async (id, data) => {
   const sanitized = sanitizeCourseData(data);
   const course = await Course.findByIdAndUpdate(id, { $set: sanitized }, { new: true, runValidators: true })
-    .populate("instructor", "name email avatar designation")
-    .populate("mentors.user", "name email avatar designation")
-    .populate("trainers.user", "name email avatar designation")
+    .populate("instructor", "name email avatar designation bio role")
+    .populate("mentors.user", "name email avatar designation bio role")
+    .populate("trainers.user", "name email avatar designation bio role")
     .populate("category");
   if (!course) throw ApiError.notFound("Course not found");
   return course;

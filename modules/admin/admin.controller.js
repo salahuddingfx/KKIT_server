@@ -142,11 +142,33 @@ const getReports = catchAsync(async (req, res) => {
   ApiResponse.success(res, { payments });
 });
 
+// ─── UPDATE USER PROFILE (admin) ────────────────────
+const updateUser = catchAsync(async (req, res) => {
+  const { name, email, phone, designation, bio, role, isActive } = req.body;
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (email !== undefined) updateData.email = email;
+  if (phone !== undefined) updateData.phone = phone;
+  if (designation !== undefined) updateData.designation = designation;
+  if (bio !== undefined) updateData.bio = bio;
+  if (role !== undefined) updateData.role = role;
+  if (isActive !== undefined) updateData.isActive = isActive;
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  ).select("-password");
+  if (!user) return ApiResponse.error(res, "User not found", 404);
+  ApiResponse.success(res, user, "User profile updated successfully");
+});
+
 module.exports = {
   getStats,
   getRecent,
   getAllUsers,
   updateUserStatus,
+  updateUser,
   getOverview,
   getReports,
 };
