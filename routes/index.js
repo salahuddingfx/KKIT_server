@@ -49,6 +49,7 @@ const gamificationRoutes = require("../modules/gamification/gamification.routes"
 const roleRoutes = require("../modules/role/role.routes");
 const serviceOrderRoutes = require("../modules/service-order/service-order.routes");
 const smsRoutes = require("../modules/sms/sms.routes");
+const employeeHrRoutes = require("../modules/employee-hr/employee-hr.routes");
 
 router.use("/health", healthRoutes);
 router.use("/docs", apiDocsRoutes);
@@ -56,6 +57,7 @@ router.use("/docs", apiDocsRoutes);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/roles", roleRoutes);
+router.use("/employee-hr", employeeHrRoutes);
 router.use("/courses", courseRoutes);
 router.use("/enrollments", enrollmentRoutes);
 router.use("/payments", paymentRoutes);
