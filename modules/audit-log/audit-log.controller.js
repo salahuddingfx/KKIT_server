@@ -15,7 +15,26 @@ const getStats = catchAsync(async (req, res) => {
   ApiResponse.success(res, stats, "Audit log analytics retrieved successfully");
 });
 
+const pingVisitor = catchAsync(async (req, res) => {
+  const { path, title, referrer } = req.body || {};
+  await service.logActivity(
+    req,
+    res,
+    "PAGE_VIEW",
+    "visitor",
+    {
+      path: path || "/",
+      title: title || "",
+      referrer: referrer || "",
+    },
+    "info"
+  );
+  ApiResponse.success(res, { recorded: true }, "Visitor ping recorded");
+});
+
 module.exports = {
   getLogs,
   getStats,
+  pingVisitor,
 };
+
