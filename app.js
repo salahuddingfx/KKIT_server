@@ -11,12 +11,15 @@ const errorHandler = require("./middleware/errorHandler");
 const { apiLimiter } = require("./middleware/rateLimiter");
 const routes = require("./routes/index");
 const { statsMiddleware } = require("./middleware/stats");
+const { auditMiddleware } = require("./middleware/audit.middleware");
 const renderDashboard = require("./utils/dashboard");
 
 const app = express();
 
-// Stats tracker (must be first)
+// Stats tracker & Audit Log tracker (must be first)
 app.use(statsMiddleware);
+app.use(auditMiddleware);
+
 
 // Security & CORS
 app.use(

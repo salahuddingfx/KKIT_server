@@ -1,10 +1,17 @@
 const ContactSubmission = require("./contact-submission.model");
 const { paginate } = require("../../utils/pagination");
 const ApiError = require("../../utils/apiError");
+const { trackServerLead } = require("../../services/tracking/tracking.service");
 
 const create = async (data) => {
-  return ContactSubmission.create(data);
+  const submission = await ContactSubmission.create(data);
+  trackServerLead({
+    leadType: data.subject?.includes("Job Application") ? "job_application" : "contact_form",
+    subject: data.subject || "Contact Submission",
+  }).catch((err) => console.error("Failed to track server lead:", err));
+  return submission;
 };
+
 
 const getAll = async (query, options) => {
   const filter = {};

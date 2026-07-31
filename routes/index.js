@@ -51,6 +51,8 @@ const serviceOrderRoutes = require("../modules/service-order/service-order.route
 const smsRoutes = require("../modules/sms/sms.routes");
 const employeeHrRoutes = require("../modules/employee-hr/employee-hr.routes");
 
+const auditLogRoutes = require("../modules/audit-log/audit-log.routes");
+
 router.use("/health", healthRoutes);
 router.use("/docs", apiDocsRoutes);
 
@@ -58,6 +60,8 @@ router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/roles", roleRoutes);
 router.use("/employee-hr", employeeHrRoutes);
+router.use("/audit-logs", auditLogRoutes);
+
 router.use("/courses", courseRoutes);
 router.use("/enrollments", enrollmentRoutes);
 router.use("/payments", paymentRoutes);

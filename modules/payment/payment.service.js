@@ -10,6 +10,8 @@ const { PAYMENT_STATUS } = require("../../utils/constants");
 const { emitEvent } = require("../gamification/gamification.service");
 const { generateInvoicePDF } = require("../../services/pdf/invoice.pdf");
 const { sendEmail } = require("../../services/email/email.service");
+const { trackServerPurchase } = require("../../services/tracking/tracking.service");
+
 
 const getAllPayments = async (query, options) => {
   const filter = {};
@@ -45,6 +47,16 @@ const createPayment = async (data, isAdmin = false) => {
 
   const payment = await Payment.create(data);
 
+  // Trigger server-side GA4 tracking event
+  trackServerPurchase({
+    paymentId: payment._id,
+    amount: payment.amount,
+    currency: payment.currency,
+    userId: payment.user,
+    method: payment.method,
+    transactionId: payment.transactionId,
+  }).catch((err) => console.error("Failed to track server purchase:", err));
+
   // Only auto-create invoice + enrollment if admin-marked completed
   if (isAdmin && payment.status === PAYMENT_STATUS.COMPLETED) {
     await finalizePayment(payment);
@@ -68,10 +80,21 @@ const confirmPayment = async (paymentId, adminId) => {
   payment.meta = { ...payment.meta, confirmedBy: adminId };
   await payment.save();
 
+  // Trigger server-side GA4 confirmed purchase tracking event
+  trackServerPurchase({
+    paymentId: payment._id,
+    amount: payment.amount,
+    currency: payment.currency,
+    userId: payment.user,
+    method: payment.method,
+    transactionId: payment.transactionId,
+  }).catch((err) => console.error("Failed to track server purchase:", err));
+
   await finalizePayment(payment);
 
   return payment;
 };
+
 
 /**
  * Admin rejects/cancels a payment
