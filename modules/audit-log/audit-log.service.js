@@ -144,9 +144,21 @@ const getStats = async () => {
   // Find overall peak hour
   const highestHour = peakHours.reduce((prev, curr) => (curr.count > prev.count ? curr : prev), { hour: "12:00", count: 0 });
 
+  // Active visitors in last 15 minutes
+  const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const activeVisitorsRaw = await AuditLog.distinct("ip", { timestamp: { $gte: fifteenMinsAgo } });
+  const activeVisitorsCount = activeVisitorsRaw.length || Math.min(totalLogs, 1);
+
+  // Security Alerts Count
+  const securityAlertsCount = await AuditLog.countDocuments({
+    $or: [{ status: "warning" }, { status: "error" }, { action: /ATTACK|BRUTE_FORCE/i }],
+  });
+
   return {
     totalLogs,
     identifiedContacts,
+    activeVisitorsCount,
+    securityAlertsCount,
     peakHour: highestHour.hour,
     peakCount: highestHour.count,
     topCountry: topCountries[0] ? topCountries[0]._id : "Bangladesh",
@@ -164,3 +176,4 @@ module.exports = {
   getLogs,
   getStats,
 };
+
