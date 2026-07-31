@@ -3,6 +3,8 @@ const { slugify } = require("../../utils/helpers");
 const { paginate } = require("../../utils/pagination");
 const ApiError = require("../../utils/apiError");
 
+const ContactSubmission = require("../contact-submission/contact-submission.model");
+
 const getAll = async (query, options) => {
   const filter = {};
   if (query.status) filter.status = query.status;
@@ -36,4 +38,30 @@ const remove = async (id) => {
   return item;
 };
 
-module.exports = { getAll, getById, create, update, remove };
+const apply = async (id, data) => {
+  const career = await Career.findById(id);
+  if (!career) throw ApiError.notFound("Job opening not found");
+  if (career.status !== "active") throw ApiError.badRequest("This job opening is no longer active");
+
+  const message = `Candidate Application for ${career.title} (${career.department})
+Name: ${data.name}
+Email: ${data.email}
+Phone: ${data.phone || "N/A"}
+Experience: ${data.experience || "N/A"}
+Resume / Portfolio URL: ${data.resumeUrl || "N/A"}
+
+Cover Letter / Note:
+${data.coverLetter || "N/A"}`;
+
+  return ContactSubmission.create({
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    subject: `Job Application: ${career.title}`,
+    message,
+    status: "new",
+  });
+};
+
+module.exports = { getAll, getById, create, update, remove, apply };
+

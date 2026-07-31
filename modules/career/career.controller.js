@@ -27,4 +27,10 @@ const remove = catchAsync(async (req, res) => {
   ApiResponse.success(res, null, "Career deleted");
 });
 
-module.exports = { getAll, getById, create, update, remove };
+const apply = catchAsync(async (req, res) => {
+  const submission = await service.apply(req.params.id, req.body);
+  ApiResponse.created(res, submission, "Application submitted successfully! Our HR team will reach out soon.");
+});
+
+module.exports = { getAll, getById, create, update, remove, apply };
+
