@@ -1,53 +1,123 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Course Outline</title></head>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-    <h1 style="margin: 0; font-size: 24px;">Course Outline</h1>
-    <p style="margin: 10px 0 0 0; opacity: 0.9;">{{courseName}}</p>
-  </div>
-  <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb;">
-    <p>Hi {{name}},</p>
-    <p>Thank you for your interest! Here&apos;s the complete course outline:</p>
-    
-    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
-      <h3 style="margin-top:0; color: #1f2937;">{{courseName}}</h3>
-      <p style="color: #6b7280; margin-bottom: 15px;">{{description}}</p>
-      <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <div style="text-align: center; padding: 10px; background: #f3f4f6; border-radius: 8px; min-width: 100px;">
-          <div style="font-size: 20px; font-weight: bold; color: #dc2626;">{{totalModules}}</div>
-          <div style="font-size: 12px; color: #6b7280;">Modules</div>
-        </div>
-        <div style="text-align: center; padding: 10px; background: #f3f4f6; border-radius: 8px; min-width: 100px;">
-          <div style="font-size: 20px; font-weight: bold; color: #dc2626;">{{totalLessons}}</div>
-          <div style="font-size: 12px; color: #6b7280;">Lessons</div>
-        </div>
-        <div style="text-align: center; padding: 10px; background: #f3f4f6; border-radius: 8px; min-width: 100px;">
-          <div style="font-size: 20px; font-weight: bold; color: #dc2626;">{{duration}}</div>
-          <div style="font-size: 12px; color: #6b7280;">Duration</div>
-        </div>
-      </div>
-    </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Outline</title>
+</head>
+<body style="font-family: Arial, Helvetica, sans-serif; background-color: #f4f5f7; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f5f7; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eef0f3;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 20px 24px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="left" valign="middle">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="background-color: #ffffff; width: 36px; height: 36px; border-radius: 8px; font-weight: 900; font-size: 18px; color: #dc2626; line-height: 36px; text-align: center;">K</td>
+                        <td style="font-size: 20px; font-weight: 800; color: #ffffff; padding-left: 8px;">KKIT</td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td align="right" valign="middle">
+                    <span style="font-size: 12px; color: #fecaca;">{{date}}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top:0; color: #1f2937;">Curriculum</h3>
-      <pre style="font-family: Arial, sans-serif; font-size: 13px; color: #374151; white-space: pre-wrap; margin: 0;">{{curriculum}}</pre>
-    </div>
+          <!-- Badge -->
+          <tr>
+            <td align="center" style="padding: 24px 40px 10px 40px;">
+              <span style="background-color: #fee2e2; color: #dc2626; padding: 6px 16px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">📚 Course Outline</span>
+            </td>
+          </tr>
 
-    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-      <p style="margin: 0 0 10px 0; color: #6b7280;">Course Price</p>
-      <div style="font-size: 32px; font-weight: bold; color: #dc2626;">${{price}}</div>
-      <p style="margin: 5px 0 0 0; font-size: 12px; color: #9ca3af;">One-time payment • Lifetime access</p>
-    </div>
+          <!-- Content -->
+          <tr>
+            <td style="padding: 20px 40px 30px 40px; color: #374151; font-size: 14px; line-height: 1.6;">
+              <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #111827;">Hi {{name}},</p>
+              <p style="margin: 0 0 20px 0; color: #4b5563;">Here's the detailed outline for your course:</p>
+              
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                <tr>
+                  <td style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
+                    <p style="margin: 0 0 12px 0; font-weight: 600; color: #111827;">📖 {{courseName}}</p>
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="padding: 4px 0; color: #4b5563; width: 80px;">Modules:</td>
+                        <td style="padding: 4px 0; color: #111827; font-weight: 600;">{{totalModules}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 4px 0; color: #4b5563;">Lessons:</td>
+                        <td style="padding: 4px 0; color: #111827;">{{totalLessons}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 4px 0; color: #4b5563;">Duration:</td>
+                        <td style="padding: 4px 0; color: #111827;">{{duration}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
-    <div style="text-align: center; margin: 30px 0;">
-      <a href="{{clientUrl}}/courses" style="background: #dc2626; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Enroll Now</a>
-    </div>
+              <!-- Module List -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                {{#each modules}}
+                <tr>
+                  <td style="padding: 10px 0; border-bottom: 1px solid #f3f4f6;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="width: 28px; vertical-align: top;">
+                          <span style="background-color: #dc2626; color: #ffffff; width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 700; display: inline-block; text-align: center; line-height: 24px;">{{@index_plus_1}}</span>
+                        </td>
+                        <td style="padding-left: 8px;">
+                          <p style="margin: 0; font-weight: 600; color: #111827; font-size: 13px;">{{this.title}}</p>
+                          <p style="margin: 2px 0 0 0; color: #6b7280; font-size: 12px;">{{this.lessonCount}} lessons</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                {{/each}}
+              </table>
 
-    <p style="color: #6b7280; font-size: 14px;">
-      If you have any questions, feel free to reply to this email or contact us at {{clientUrl}}/contact
-    </p>
-    <p>Best,<br>The KKIT Team</p>
-  </div>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0 0 0;">
+                <tr>
+                  <td align="center">
+                    <a href="{{courseUrl}}" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: #ffffff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(220,38,38,0.3);">View Course</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr><td style="padding: 0 40px;"><hr style="border: 0; border-top: 1px solid #f3f4f6;"></td></tr>
+          <tr>
+            <td style="padding: 24px 40px; background-color: #fafbfc; text-align: center;">
+              <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin-bottom: 16px;">
+                <tr>
+                  <td style="padding: 0 8px;"><a href="https://facebook.com/kkitbd"><img src="https://img.icons8.com/color/48/facebook-new.png" width="28" height="28" alt="Facebook" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://linkedin.com/company/kkitbd"><img src="https://img.icons8.com/color/48/linkedin.png" width="28" height="28" alt="LinkedIn" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://twitter.com/kkitbd"><img src="https://img.icons8.com/color/48/twitter.png" width="28" height="28" alt="Twitter" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://kkitbd.com"><img src="https://img.icons8.com/color/48/domain.png" width="28" height="28" alt="Website" style="display: block; border: 0;"></a></td>
+                </tr>
+              </table>
+              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #4b5563;">KKIT Limited</p>
+              <p style="margin: 0 0 8px 0; font-size: 11px; color: #9ca3af;">support@kkitbd.com | +880 1700-000000</p>
+              <p style="margin: 0; font-size: 10px; color: #bdc3c7;">© 2026 KKIT. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

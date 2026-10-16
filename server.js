@@ -2,6 +2,7 @@ const app = require("./app");
 const env = require("./config/env");
 const connectDB = require("./config/db");
 const { printBanner, startSpinner } = require("./utils/banner");
+const { initSocket } = require("./config/socket");
 const mongoose = require("mongoose");
 
 const fixBadCategoryRefs = async () => {
@@ -38,6 +39,7 @@ const startServer = async () => {
   try { await fixBadCategoryRefs(); } catch (e) { console.error("Category fix skipped:", e.message); }
 
   const server = app.listen(env.PORT, async () => {
+    initSocket(server);
     await printBanner({
       port: env.PORT,
       env:  env.NODE_ENV || "development",

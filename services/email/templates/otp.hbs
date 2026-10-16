@@ -5,112 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verification OTP Code</title>
 </head>
-<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f5f7; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+<body style="font-family: Arial, Helvetica, sans-serif; background-color: #f4f5f7; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
   <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f5f7; padding: 40px 0;">
     <tr>
       <td align="center">
-        <!-- Main Card Container -->
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #eef0f3;">
           
-          <!-- Header (Brand & Logo) -->
+          <!-- Header with Logo Left & Date Right -->
           <tr>
-            <td align="center" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 30px 20px;">
-              <table border="0" cellpadding="0" cellspacing="0">
+            <td style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 20px 24px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                  <td align="center" style="background-color: #ffffff; width: 44px; height: 44px; border-radius: 10px; font-weight: 900; font-size: 24px; color: #dc2626; line-height: 44px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                    K
+                  <!-- Left: Logo -->
+                  <td align="left" valign="middle">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="background-color: #ffffff; width: 36px; height: 36px; border-radius: 8px; font-weight: 900; font-size: 18px; color: #dc2626; line-height: 36px; text-align: center;">K</td>
+                        <td style="font-size: 20px; font-weight: 800; color: #ffffff; padding-left: 8px;">KKIT</td>
+                      </tr>
+                    </table>
                   </td>
-                  <td style="font-size: 26px; font-weight: 800; color: #ffffff; padding-left: 12px; letter-spacing: 0.5px;">
-                    KKIT
+                  <!-- Right: Date -->
+                  <td align="right" valign="middle">
+                    <span style="font-size: 12px; color: #fecaca;">{{date}}</span>
                   </td>
                 </tr>
               </table>
-              <p style="margin: 8px 0 0 0; font-size: 13px; color: #fecaca; letter-spacing: 1px; text-transform: uppercase; font-weight: 500;">Premium Digital Solutions</p>
             </td>
           </tr>
 
-          <!-- Email Title Badge -->
+          <!-- Title Badge -->
           <tr>
-            <td align="center" style="padding: 30px 40px 10px 40px;">
-              <span style="background-color: #fee2e2; color: #dc2626; padding: 6px 16px; border-radius: 99px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">
+            <td align="center" style="padding: 24px 40px 10px 40px;">
+              <span style="background-color: #fee2e2; color: #dc2626; padding: 6px 16px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">
                 {{title}}
               </span>
             </td>
           </tr>
 
-          <!-- Content Body -->
+          <!-- Content -->
           <tr>
-            <td style="padding: 20px 40px 30px 40px; color: #374151; font-size: 15px; line-height: 1.6;">
-              <p style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #111827;">Hi {{name}},</p>
-              <p style="margin: 0 0 24px 0; color: #4b5563;">{{description}} Use the verification code below to securely verify your request:</p>
+            <td style="padding: 20px 40px 30px 40px; color: #374151; font-size: 14px; line-height: 1.6;">
+              <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #111827;">Hi {{name}},</p>
+              <p style="margin: 0 0 20px 0; color: #4b5563;">{{description}}</p>
               
               <!-- OTP Box -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                 <tr>
-                  <td align="center" style="background-color: #fafafa; border: 2px dashed #e5e7eb; border-radius: 8px; padding: 20px;">
-                    <span style="font-family: 'Courier New', Courier, monospace; font-size: 38px; font-weight: 800; letter-spacing: 8px; color: #dc2626; display: inline-block;">{{otp}}</span>
+                  <td align="center" style="background-color: #fafafa; border: 2px dashed #e5e7eb; border-radius: 8px; padding: 16px;">
+                    <span style="font-family: 'Courier New', Courier, monospace; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #dc2626;">{{otp}}</span>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin: 24px 0 0 0; color: #6b7280; font-size: 13px; text-align: center;">
-                This code is valid for <strong style="color: #374151;">15 minutes</strong>. If you did not make this request, you can safely ignore this email.
+              <p style="margin: 20px 0 0 0; color: #6b7280; font-size: 12px; text-align: center;">
+                This code is valid for <strong style="color: #374151;">15 minutes</strong>.
               </p>
             </td>
           </tr>
 
-          <!-- Divider -->
+          <!-- Footer -->
           <tr>
-            <td style="padding: 0 40px;">
-              <hr style="border: 0; border-top: 1px solid #f3f4f6; margin: 0;">
-            </td>
+            <td style="padding: 0 40px;"><hr style="border: 0; border-top: 1px solid #f3f4f6; margin: 0;"></td>
           </tr>
-
-          <!-- Footer & Socials -->
           <tr>
-            <td style="padding: 30px 40px; background-color: #fafbfc; text-align: center;">
-              
-              <!-- Social Icons -->
-              <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin-bottom: 20px;">
+            <td style="padding: 24px 40px; background-color: #fafbfc; text-align: center;">
+              <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin-bottom: 16px;">
                 <tr>
-                  <td style="padding: 0 10px;">
-                    <a href="https://facebook.com/kkitbd" target="_blank" style="text-decoration: none;">
-                      <img src="https://img.icons8.com/color/48/facebook-new.png" width="32" height="32" alt="Facebook" style="display: block; border: 0;">
-                    </a>
-                  </td>
-                  <td style="padding: 0 10px;">
-                    <a href="https://linkedin.com/company/kkitbd" target="_blank" style="text-decoration: none;">
-                      <img src="https://img.icons8.com/color/48/linkedin.png" width="32" height="32" alt="LinkedIn" style="display: block; border: 0;">
-                    </a>
-                  </td>
-                  <td style="padding: 0 10px;">
-                    <a href="https://twitter.com/kkitbd" target="_blank" style="text-decoration: none;">
-                      <img src="https://img.icons8.com/color/48/twitter.png" width="32" height="32" alt="Twitter" style="display: block; border: 0;">
-                    </a>
-                  </td>
-                  <td style="padding: 0 10px;">
-                    <a href="https://github.com/kkitbd" target="_blank" style="text-decoration: none;">
-                      <img src="https://img.icons8.com/material-outlined/48/github.png" width="32" height="32" alt="GitHub" style="display: block; border: 0;">
-                    </a>
-                  </td>
-                  <td style="padding: 0 10px;">
-                    <a href="https://kkitbd.com" target="_blank" style="text-decoration: none;">
-                      <img src="https://img.icons8.com/color/48/domain.png" width="32" height="32" alt="Website" style="display: block; border: 0;">
-                    </a>
-                  </td>
+                  <td style="padding: 0 8px;"><a href="https://facebook.com/kkitbd" target="_blank"><img src="https://img.icons8.com/color/48/facebook-new.png" width="28" height="28" alt="Facebook" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://linkedin.com/company/kkitbd" target="_blank"><img src="https://img.icons8.com/color/48/linkedin.png" width="28" height="28" alt="LinkedIn" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://twitter.com/kkitbd" target="_blank"><img src="https://img.icons8.com/color/48/twitter.png" width="28" height="28" alt="Twitter" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://kkitbd.com" target="_blank"><img src="https://img.icons8.com/color/48/domain.png" width="28" height="28" alt="Website" style="display: block; border: 0;"></a></td>
                 </tr>
               </table>
-
-              <!-- Company Info -->
-              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 600; color: #4b5563;">KKIT Limited</p>
-              <p style="margin: 0 0 12px 0; font-size: 11px; color: #9ca3af; line-height: 1.4;">
-                Sector 11, Uttara, Dhaka - 1230, Bangladesh<br>
-                support@kkitbd.com | +880 1700-000000
-              </p>
-              <p style="margin: 0; font-size: 10px; color: #bdc3c7;">
-                © 2026 KKIT. All rights reserved.
-              </p>
-
+              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #4b5563;">KKIT Limited</p>
+              <p style="margin: 0 0 8px 0; font-size: 11px; color: #9ca3af;">support@kkitbd.com | +880 1700-000000</p>
+              <p style="margin: 0; font-size: 10px; color: #bdc3c7;">© 2026 KKIT. All rights reserved.</p>
             </td>
           </tr>
 

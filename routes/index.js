@@ -50,6 +50,15 @@ const roleRoutes = require("../modules/role/role.routes");
 const serviceOrderRoutes = require("../modules/service-order/service-order.routes");
 const smsRoutes = require("../modules/sms/sms.routes");
 const employeeHrRoutes = require("../modules/employee-hr/employee-hr.routes");
+const notificationRoutes = require("../modules/notification/notification.routes");
+const progressRoutes = require("../modules/progress/progress.routes");
+const chatRoutes = require("../modules/chat/chat.routes");
+const subscriptionRoutes = require("../modules/subscription/subscription.routes");
+const referralRoutes = require("../modules/referral/referral.routes");
+const installmentRoutes = require("../modules/installment/installment.routes");
+const quizRoutes = require("../modules/quiz/quiz.routes");
+const analyticsRoutes = require("../modules/analytics/analytics.routes");
+const webhookRoutes = require("../modules/webhook/webhook.routes");
 
 const auditLogRoutes = require("../modules/audit-log/audit-log.routes");
 
@@ -105,5 +114,14 @@ router.use("/email-campaigns", emailCampaignRoutes);
 router.use("/revenue-analytics", revenueAnalyticsRoutes);
 router.use("/gamification", gamificationRoutes);
 router.use("/events", eventsRoutes);
+router.use("/notifications", notificationRoutes);
+router.use("/progress", progressRoutes);
+router.use("/chat", chatRoutes);
+router.use("/subscriptions", subscriptionRoutes);
+router.use("/referrals", referralRoutes);
+router.use("/installments", installmentRoutes);
+router.use("/quizzes", quizRoutes);
+router.use("/analytics", analyticsRoutes);
+router.use("/webhooks", webhookRoutes);
 
 module.exports = router;

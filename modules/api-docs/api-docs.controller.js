@@ -183,6 +183,27 @@ const endpoints = [
 
   // ── Dashboard ──
   { method: "GET", path: "/api/v1/dashboard/stats", auth: true, role: "admin", description: "Get admin dashboard stats", group: "Dashboard" },
+
+  // ── Notifications ──
+  { method: "GET", path: "/api/v1/notifications", auth: true, description: "Get my notifications", group: "Notifications" },
+  { method: "GET", path: "/api/v1/notifications/unread-count", auth: true, description: "Get unread notification count", group: "Notifications" },
+  { method: "PUT", path: "/api/v1/notifications/read-all", auth: true, description: "Mark all notifications as read", group: "Notifications" },
+  { method: "PUT", path: "/api/v1/notifications/read/:id", auth: true, description: "Mark notification as read", group: "Notifications" },
+  { method: "DELETE", path: "/api/v1/notifications/:id", auth: true, description: "Delete a notification", group: "Notifications" },
+  { method: "POST", path: "/api/v1/notifications/register-token", auth: true, description: "Register FCM token for push notifications", body: ["fcmToken"], group: "Notifications" },
+  { method: "POST", path: "/api/v1/notifications/send", auth: true, role: "admin", description: "Send notification to a user", body: ["userId", "title", "body", "type?"], group: "Notifications" },
+  { method: "POST", path: "/api/v1/notifications/send-bulk", auth: true, role: "admin", description: "Send notification to multiple users", body: ["userIds", "title", "body", "type?"], group: "Notifications" },
+
+  // ── Progress ──
+  { method: "GET", path: "/api/v1/progress/dashboard", auth: true, description: "Get my courses progress overview", group: "Progress" },
+  { method: "GET", path: "/api/v1/progress/:courseId", auth: true, description: "Get course progress details", group: "Progress" },
+  { method: "POST", path: "/api/v1/progress/:courseId/:lessonId/complete", auth: true, description: "Mark lesson as complete", group: "Progress" },
+  { method: "PUT", path: "/api/v1/progress/:courseId/:lessonId", auth: true, description: "Update lesson progress (watch time, position)", body: ["watchTime?", "lastPosition?"], group: "Progress" },
+  { method: "DELETE", path: "/api/v1/progress/:courseId/:lessonId", auth: true, description: "Delete lesson progress", group: "Progress" },
+
+  // ── Certificates (enhanced) ──
+  { method: "GET", path: "/api/v1/certificates/verify/:number", auth: false, description: "Verify certificate by number", group: "Certificates" },
+  { method: "POST", path: "/api/v1/certificates/generate", auth: true, role: "admin", description: "Generate certificate for completed enrollment", body: ["enrollment"], group: "Certificates" },
 ];
 
 const groups = [...new Set(endpoints.map(e => e.group))];

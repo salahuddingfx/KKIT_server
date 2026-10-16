@@ -1,28 +1,124 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>New Module Download Request</title></head>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: #F59E0B; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-    <h1 style="margin: 0;">New Download Request</h1>
-  </div>
-  <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb;">
-    <p>A student has requested to download a module PDF.</p>
-    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top:0;">Student Details</h3>
-      <p><strong>Name:</strong> {{studentName}}</p>
-      <p><strong>Email:</strong> {{studentEmail}}</p>
-      <p><strong>Phone:</strong> {{studentPhone}}</p>
-      <p><strong>WhatsApp:</strong> {{whatsapp}}</p>
-    </div>
-    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin-top:0;">Module Details</h3>
-      <p><strong>Course:</strong> {{courseName}}</p>
-      <p><strong>Module:</strong> {{moduleName}}</p>
-    </div>
-    <p>Please send the module PDF to the student's email address.</p>
-    <div style="text-align: center; margin: 30px 0;">
-      <a href="{{adminUrl}}/admin/download-requests" style="background: #F59E0B; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View in Admin Panel</a>
-    </div>
-  </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module Download Request</title>
+</head>
+<body style="font-family: Arial, Helvetica, sans-serif; background-color: #f4f5f7; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f5f7; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eef0f3;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px 24px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="left" valign="middle">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="background-color: #ffffff; width: 36px; height: 36px; border-radius: 8px; font-weight: 900; font-size: 18px; color: #f59e0b; line-height: 36px; text-align: center;">K</td>
+                        <td style="font-size: 20px; font-weight: 800; color: #ffffff; padding-left: 8px;">KKIT</td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td align="right" valign="middle">
+                    <span style="font-size: 12px; color: #fef3c7;">{{date}}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Badge -->
+          <tr>
+            <td align="center" style="padding: 24px 40px 10px 40px;">
+              <span style="background-color: #fef3c7; color: #d97706; padding: 6px 16px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">📥 Download Request</span>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 20px 40px 30px 40px; color: #374151; font-size: 14px; line-height: 1.6;">
+              <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #111827;">New Module Download Request</p>
+              <p style="margin: 0 0 20px 0; color: #4b5563;">A student has requested to download a module PDF.</p>
+              
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                <tr>
+                  <td style="background-color: #f9fafb; border-radius: 8px; padding: 20px; border: 1px solid #e5e7eb;">
+                    <p style="margin: 0 0 12px 0; font-weight: 600; color: #111827;">👤 Student Details</p>
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="padding: 4px 0; color: #4b5563; width: 100px;">Name:</td>
+                        <td style="padding: 4px 0; color: #111827; font-weight: 600;">{{studentName}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 4px 0; color: #4b5563;">Email:</td>
+                        <td style="padding: 4px 0; color: #111827;">{{studentEmail}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 4px 0; color: #4b5563;">Phone:</td>
+                        <td style="padding: 4px 0; color: #111827;">{{studentPhone}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 4px 0; color: #4b5563;">WhatsApp:</td>
+                        <td style="padding: 4px 0; color: #111827;">{{whatsapp}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                <tr>
+                  <td style="background-color: #fef3c7; border-radius: 8px; padding: 20px; border: 1px solid #fde68a;">
+                    <p style="margin: 0 0 12px 0; font-weight: 600; color: #92400e;">📚 Module Details</p>
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="padding: 4px 0; color: #92400e; width: 80px;">Course:</td>
+                        <td style="padding: 4px 0; color: #92400e; font-weight: 600;">{{courseName}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 4px 0; color: #92400e;">Module:</td>
+                        <td style="padding: 4px 0; color: #92400e; font-weight: 600;">{{moduleName}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                <tr>
+                  <td style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 16px;">
+                    <p style="margin: 0; font-size: 13px; color: #92400e;">⚠️ <strong>Action Required:</strong> Please send the module PDF to the student's email.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr><td style="padding: 0 40px;"><hr style="border: 0; border-top: 1px solid #f3f4f6;"></td></tr>
+          <tr>
+            <td style="padding: 24px 40px; background-color: #fafbfc; text-align: center;">
+              <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin-bottom: 16px;">
+                <tr>
+                  <td style="padding: 0 8px;"><a href="https://facebook.com/kkitbd"><img src="https://img.icons8.com/color/48/facebook-new.png" width="28" height="28" alt="Facebook" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://linkedin.com/company/kkitbd"><img src="https://img.icons8.com/color/48/linkedin.png" width="28" height="28" alt="LinkedIn" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://twitter.com/kkitbd"><img src="https://img.icons8.com/color/48/twitter.png" width="28" height="28" alt="Twitter" style="display: block; border: 0;"></a></td>
+                  <td style="padding: 0 8px;"><a href="https://kkitbd.com"><img src="https://img.icons8.com/color/48/domain.png" width="28" height="28" alt="Website" style="display: block; border: 0;"></a></td>
+                </tr>
+              </table>
+              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #4b5563;">KKIT Limited</p>
+              <p style="margin: 0 0 8px 0; font-size: 11px; color: #9ca3af;">support@kkitbd.com | +880 1700-000000</p>
+              <p style="margin: 0; font-size: 10px; color: #bdc3c7;">© 2026 KKIT. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

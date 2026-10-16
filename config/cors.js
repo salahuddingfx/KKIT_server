@@ -2,7 +2,13 @@ const env = require("./env");
 
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = [env.CLIENT_URL, env.ADMIN_URL];
+    const allowedOrigins = [
+      env.CLIENT_URL,
+      env.ADMIN_URL,
+      "capacitor://localhost",
+      "https://localhost",
+      "http://localhost",
+    ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {

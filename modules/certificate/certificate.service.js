@@ -4,6 +4,7 @@ const ApiError = require("../../utils/apiError");
 const { paginate } = require("../../utils/pagination");
 const { generateCertificatePDF } = require("../../services/pdf/certificate.pdf");
 const { sendEmail } = require("../../services/email/email.service");
+const env = require("../../config/env");
 
 const getAllCertificates = async (query, options) => {
   const filter = {};
@@ -18,6 +19,15 @@ const getCertificateById = async (id) => {
   return cert;
 };
 
+const verifyCertificate = async (certificateNumber) => {
+  const cert = await Certificate.findOne({ certificateNumber })
+    .populate("user", "name email")
+    .populate("course", "title");
+  if (!cert) throw ApiError.notFound("Certificate not found");
+  if (cert.status !== "active") throw ApiError.badRequest("Certificate is revoked");
+  return cert;
+};
+
 const generateCertificate = async (data) => {
   const enrollment = await Enrollment.findById(data.enrollment).populate("user course");
   if (!enrollment) throw ApiError.notFound("Enrollment not found");
@@ -26,14 +36,7 @@ const generateCertificate = async (data) => {
   const existing = await Certificate.findOne({ enrollment: data.enrollment });
   if (existing) throw ApiError.conflict("Certificate already exists");
 
-  const certData = {
-    studentName: enrollment.user.name,
-    courseName: enrollment.course.title,
-    date: new Date().toLocaleDateString(),
-    certificateNumber: "", // will be auto-generated
-  };
-
-  const pdfBuffer = await generateCertificatePDF(certData);
+  const verificationUrl = `${env.CLIENT_URL || "https://kkitbd.com"}/verify-certificate`;
 
   const certificate = await Certificate.create({
     user: enrollment.user._id,
@@ -43,6 +46,19 @@ const generateCertificate = async (data) => {
     courseName: enrollment.course.title,
     completionDate: new Date(),
   });
+
+  const certData = {
+    studentName: enrollment.user.name,
+    courseName: enrollment.course.title,
+    date: new Date().toLocaleDateString(),
+    certificateNumber: certificate.certificateNumber,
+    verificationUrl,
+  };
+
+  const pdfBuffer = await generateCertificatePDF(certData);
+
+  certificate.pdfUrl = `/uploads/certificates/${certificate.certificateNumber}.pdf`;
+  await certificate.save();
 
   // Link certificate to enrollment
   enrollment.certificate = certificate._id;
@@ -60,7 +76,7 @@ const generateCertificate = async (data) => {
     }],
   }).catch(() => {});
 
-  return certificate;
+  return { certificate, pdfBuffer };
 };
 
-module.exports = { getAllCertificates, getCertificateById, generateCertificate };
+module.exports = { getAllCertificates, getCertificateById, verifyCertificate, generateCertificate };

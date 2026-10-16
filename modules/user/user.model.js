@@ -94,6 +94,11 @@ const userSchema = new mongoose.Schema(
         date: { type: Date, default: Date.now },
       },
     ],
+    fcmTokens: [
+      {
+        type: String,
+      },
+    ],
     otpCode: String,
     otpExpire: Date,
     otpPurpose: String,

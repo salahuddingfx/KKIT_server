@@ -4,6 +4,8 @@ const certificateController = require("./certificate.controller");
 const { protect } = require("../../middleware/auth");
 const { authorize } = require("../../middleware/role");
 
+router.get("/verify/:number", certificateController.verifyCertificate);
+
 router.use(protect);
 
 router.get("/", certificateController.getAllCertificates);
