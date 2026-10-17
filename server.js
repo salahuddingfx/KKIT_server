@@ -42,7 +42,7 @@ const startServer = async () => {
     await printBanner({
       port: env.PORT,
       env:  env.NODE_ENV || "development",
-      mongoHost: dbHost || "localhost",
+      dbHost: dbHost || "localhost",
     });
   });
 

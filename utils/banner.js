@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 // ─── ANSI color helpers ───────────────────────────────────────────────────────
 const c = {
@@ -69,7 +69,7 @@ function startSpinner(label) {
 }
 
 // ─── main banner ─────────────────────────────────────────────────────────────
-async function printBanner({ port, env, mongoHost }) {
+async function printBanner({ port, env, dbHost }) {
   console.clear();
 
   // Logo — print each line with a tiny stagger
@@ -95,7 +95,7 @@ async function printBanner({ port, env, mongoHost }) {
   const rows = [
     infoRow("Environment", env.toUpperCase(),  env === "production" ? c.green : c.yellow),
     infoRow("Port",        port,                c.cyan),
-    infoRow("Database",    mongoHost,           c.green),
+    infoRow("Database",    dbHost,              c.green),
     infoRow("API Base",    `/api/v1`,           c.blue),
     infoRow("Docs",        `/api/v1/health`,    c.blue),
     infoRow("Mode",        env === "production" ? "🔒  Production" : "🛠   Development", c.orange),
