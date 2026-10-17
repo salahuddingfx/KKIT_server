@@ -19,13 +19,19 @@ function translateMongoQuery(query = {}) {
       where[Op.and] = value.map(translateMongoQuery);
     } else if (key === "_id") {
       where.id = value;
-    } else if (value && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date)) {
+    } else if (value instanceof RegExp) {
+      where[key] = { [Op.regexp]: value.source };
+    } else if (value && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date) && !(value instanceof RegExp)) {
       // Handle operators inside value: { $regex, $options, $in, $gte, etc. }
       const fieldOps = {};
       for (const [opKey, opVal] of Object.entries(value)) {
         if (opKey === "$regex") {
-          const cleanPattern = String(opVal).replace(/^\^|\$$/g, "");
-          fieldOps[Op.like] = `%${cleanPattern}%`;
+          const pattern = opVal instanceof RegExp ? opVal.source : String(opVal).replace(/^\^|\$$/g, "");
+          if (pattern.includes("|") || pattern.includes("(") || pattern.includes("[")) {
+            fieldOps[Op.regexp] = pattern;
+          } else {
+            fieldOps[Op.like] = `%${pattern}%`;
+          }
         } else if (opKey === "$in" && Array.isArray(opVal)) {
           fieldOps[Op.in] = opVal;
         } else if (opKey === "$nin" && Array.isArray(opVal)) {
@@ -47,9 +53,6 @@ function translateMongoQuery(query = {}) {
       } else {
         where[key] = value;
       }
-    } else if (value instanceof RegExp) {
-      const cleanPattern = value.source.replace(/^\^|\$$/g, "");
-      where[key] = { [Op.like]: `%${cleanPattern}%` };
     } else {
       where[key] = value;
     }
@@ -295,6 +298,21 @@ function enhanceModel(Model) {
             const fnExpr = sequelize.fn("DATE_FORMAT", sequelize.col(dateField), fmt);
             attributes.push([fnExpr, "_id"]);
             groupCols.push(fnExpr);
+          } else if (idExpr.$hour) {
+            const dateField = (typeof idExpr.$hour === "string" ? idExpr.$hour : "$timestamp").replace(/^\$/, "");
+            const fnExpr = sequelize.fn("HOUR", sequelize.col(dateField));
+            attributes.push([fnExpr, "_id"]);
+            groupCols.push(fnExpr);
+          } else if (idExpr.$month) {
+            const dateField = (typeof idExpr.$month === "string" ? idExpr.$month : "$timestamp").replace(/^\$/, "");
+            const fnExpr = sequelize.fn("MONTH", sequelize.col(dateField));
+            attributes.push([fnExpr, "_id"]);
+            groupCols.push(fnExpr);
+          } else if (idExpr.$year) {
+            const dateField = (typeof idExpr.$year === "string" ? idExpr.$year : "$timestamp").replace(/^\$/, "");
+            const fnExpr = sequelize.fn("YEAR", sequelize.col(dateField));
+            attributes.push([fnExpr, "_id"]);
+            groupCols.push(fnExpr);
           } else {
             for (const [k, v] of Object.entries(idExpr)) {
               if (typeof v === "string" && v.startsWith("$")) {
@@ -328,6 +346,9 @@ function enhanceModel(Model) {
           } else if (expr.$max !== undefined) {
             const f = typeof expr.$max === "string" ? expr.$max.replace(/^\$/, "") : "id";
             attributes.push([sequelize.fn("MAX", sequelize.col(f)), key]);
+          } else if (expr.$first !== undefined) {
+            const f = typeof expr.$first === "string" ? expr.$first.replace(/^\$/, "") : "id";
+            attributes.push([sequelize.fn("MIN", sequelize.col(f)), key]);
           }
         }
       }
@@ -344,10 +365,13 @@ function enhanceModel(Model) {
 
       if (sortStage) {
         if (typeof sortStage === "object") {
-          queryOptions.order = Object.entries(sortStage).map(([k, v]) => [
-            sequelize.col(k),
-            v === -1 || v === "desc" ? "DESC" : "ASC",
-          ]);
+          queryOptions.order = Object.entries(sortStage).map(([k, v]) => {
+            const dir = v === -1 || v === "desc" ? "DESC" : "ASC";
+            if (k === "_id" && groupCols.length > 0) {
+              return [groupCols[0], dir];
+            }
+            return [sequelize.literal(`\`${k}\``), dir];
+          });
         }
       }
 
