@@ -326,6 +326,31 @@ const getMe = async (userId) => {
   };
 };
 
+const updateProfile = async (userId, data) => {
+  const allowedFields = ["name", "phone", "bio", "designation", "avatar", "address", "socialLinks"];
+  const updateData = {};
+  for (const field of allowedFields) {
+    if (data[field] !== undefined) {
+      updateData[field] = data[field];
+    }
+  }
+
+  const user = await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true });
+  if (!user) throw ApiError.notFound("User not found");
+
+  const roleService = require("../role/role.service");
+  const roleObj = await roleService.getRoleBySlug(user.role);
+  const userJson = user.toJSON ? user.toJSON() : { ...user };
+  delete userJson.password;
+  delete userJson.refreshToken;
+
+  return {
+    ...userJson,
+    allowedPages: roleObj?.allowedPages || [],
+    permissions: roleObj?.permissions || [],
+  };
+};
+
 module.exports = {
   register,
   verifyRegister,
@@ -336,4 +361,5 @@ module.exports = {
   resetPassword,
   changePassword,
   getMe,
+  updateProfile,
 };

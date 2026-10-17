@@ -143,6 +143,11 @@ const getMe = catchAsync(async (req, res) => {
   ApiResponse.success(res, user);
 });
 
+const updateProfile = catchAsync(async (req, res) => {
+  const user = await authService.updateProfile(req.user._id, req.body);
+  ApiResponse.success(res, user, "Profile updated successfully");
+});
+
 const logout = catchAsync(async (req, res) => {
   clearTokenCookies(req, res);
   ApiResponse.success(res, null, "Logged out successfully");
@@ -158,5 +163,6 @@ module.exports = {
   resetPassword,
   changePassword,
   getMe,
+  updateProfile,
   logout,
 };
