@@ -141,14 +141,19 @@ const getAllRoles = async () => {
   const roles = await Role.find().sort({ isSystem: -1, createdAt: 1 }).lean();
 
   // Aggregate count of users per role
-  const userCounts = await User.aggregate([
-    { $group: { _id: "$role", count: { $sum: 1 } } },
-  ]);
-
   const countMap = {};
-  userCounts.forEach((u) => {
-    if (u._id) countMap[u._id] = u.count;
-  });
+  try {
+    const userCounts = await User.aggregate([
+      { $group: { _id: "$role", count: { $sum: 1 } } },
+    ]);
+    if (Array.isArray(userCounts)) {
+      userCounts.forEach((u) => {
+        if (u && u._id) countMap[u._id] = u.count;
+      });
+    }
+  } catch (err) {
+    console.error("Failed to aggregate user counts for roles:", err);
+  }
 
   return roles.map((r) => ({
     ...r,

@@ -239,6 +239,142 @@ function enhanceModel(Model) {
     return rows.map((r) => r[field]).filter(Boolean);
   };
 
+  const origAggregate = Model.aggregate ? Model.aggregate.bind(Model) : null;
+  Model.aggregate = async function (pipeline) {
+    if (!Array.isArray(pipeline)) {
+      if (origAggregate) return origAggregate.apply(this, arguments);
+      return [];
+    }
+
+    try {
+      const sequelize = this.sequelize;
+      let where = {};
+      let groupStage = null;
+      let sortStage = null;
+      let limitNum = null;
+
+      for (const stage of pipeline) {
+        if (!stage || typeof stage !== "object") continue;
+        if (stage.$match) {
+          const matchWhere = translateMongoQuery(stage.$match);
+          where = { ...where, ...matchWhere };
+        } else if (stage.$group) {
+          groupStage = stage.$group;
+        } else if (stage.$sort) {
+          sortStage = stage.$sort;
+        } else if (stage.$limit) {
+          limitNum = Number(stage.$limit);
+        }
+      }
+
+      if (!groupStage) {
+        const findOptions = { where, raw: true };
+        if (sortStage) findOptions.order = parseSortOrder(sortStage);
+        if (limitNum) findOptions.limit = limitNum;
+        const rows = await this.findAll(findOptions);
+        return rows.map((r) => {
+          if (r && !r._id && r.id) r._id = r.id;
+          return r;
+        });
+      }
+
+      const attributes = [];
+      const groupCols = [];
+      const idExpr = groupStage._id;
+      const isGroupIdNull = idExpr === null || idExpr === undefined;
+
+      if (!isGroupIdNull) {
+        if (typeof idExpr === "string" && idExpr.startsWith("$")) {
+          const field = idExpr.substring(1);
+          attributes.push([sequelize.col(field), "_id"]);
+          groupCols.push(sequelize.col(field));
+        } else if (typeof idExpr === "object") {
+          if (idExpr.$dateToString) {
+            const dateField = (idExpr.$dateToString.date || "$createdAt").replace(/^\$/, "");
+            const fmt = idExpr.$dateToString.format === "%Y-%m" ? "%Y-%m" : idExpr.$dateToString.format || "%Y-%m-%d";
+            const fnExpr = sequelize.fn("DATE_FORMAT", sequelize.col(dateField), fmt);
+            attributes.push([fnExpr, "_id"]);
+            groupCols.push(fnExpr);
+          } else {
+            for (const [k, v] of Object.entries(idExpr)) {
+              if (typeof v === "string" && v.startsWith("$")) {
+                const f = v.substring(1);
+                attributes.push([sequelize.col(f), k]);
+                groupCols.push(sequelize.col(f));
+              }
+            }
+          }
+        }
+      }
+
+      for (const [key, expr] of Object.entries(groupStage)) {
+        if (key === "_id") continue;
+        if (typeof expr === "object" && expr !== null) {
+          if (expr.$sum !== undefined) {
+            if (expr.$sum === 1) {
+              attributes.push([sequelize.fn("COUNT", sequelize.col(this.primaryKeyAttribute || "id")), key]);
+            } else if (typeof expr.$sum === "string" && expr.$sum.startsWith("$")) {
+              const f = expr.$sum.substring(1);
+              attributes.push([sequelize.fn("COALESCE", sequelize.fn("SUM", sequelize.col(f)), 0), key]);
+            } else if (typeof expr.$sum === "number") {
+              attributes.push([sequelize.literal(`${expr.$sum} * COUNT(*)`), key]);
+            }
+          } else if (expr.$avg !== undefined) {
+            const f = typeof expr.$avg === "string" ? expr.$avg.replace(/^\$/, "") : "rating";
+            attributes.push([sequelize.fn("COALESCE", sequelize.fn("AVG", sequelize.col(f)), 0), key]);
+          } else if (expr.$min !== undefined) {
+            const f = typeof expr.$min === "string" ? expr.$min.replace(/^\$/, "") : "id";
+            attributes.push([sequelize.fn("MIN", sequelize.col(f)), key]);
+          } else if (expr.$max !== undefined) {
+            const f = typeof expr.$max === "string" ? expr.$max.replace(/^\$/, "") : "id";
+            attributes.push([sequelize.fn("MAX", sequelize.col(f)), key]);
+          }
+        }
+      }
+
+      const queryOptions = {
+        where,
+        attributes: attributes.length > 0 ? attributes : undefined,
+        raw: true,
+      };
+
+      if (groupCols.length > 0) {
+        queryOptions.group = groupCols;
+      }
+
+      if (sortStage) {
+        if (typeof sortStage === "object") {
+          queryOptions.order = Object.entries(sortStage).map(([k, v]) => [
+            sequelize.col(k),
+            v === -1 || v === "desc" ? "DESC" : "ASC",
+          ]);
+        }
+      }
+
+      if (limitNum) {
+        queryOptions.limit = limitNum;
+      }
+
+      const results = await this.findAll(queryOptions);
+
+      return results.map((row) => {
+        const item = { ...row };
+        if (isGroupIdNull) {
+          item._id = null;
+        }
+        for (const [k, v] of Object.entries(item)) {
+          if (k !== "_id" && typeof v === "string" && /^-?\d+(\.\d+)?$/.test(v)) {
+            item[k] = Number(v);
+          }
+        }
+        return item;
+      });
+    } catch (err) {
+      console.error(`Aggregate emulation error on ${this.name}:`, err);
+      return [];
+    }
+  };
+
   // Mongoose chainable find
   const origFindAll = Model.findAll.bind(Model);
   Model.find = function (query = {}) {
