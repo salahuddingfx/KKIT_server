@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const Course = require("./course.model");
 const Category = require("../category/category.model");
 const User = require("../user/user.model");
@@ -10,7 +9,7 @@ const { sendEmail } = require("../../services/email/email.service");
 
 const resolveCategoryId = async (categoryValue) => {
   if (!categoryValue) return null;
-  if (mongoose.Types.ObjectId.isValid(categoryValue)) return categoryValue;
+  if (/^\d+$/.test(String(categoryValue))) return Number(categoryValue);
   const cat = await Category.findOne({
     $or: [{ name: categoryValue }, { slug: categoryValue }],
   });

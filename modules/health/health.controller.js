@@ -1,9 +1,13 @@
-const mongoose = require("mongoose");
+const sequelize = require("../../config/sequelize");
 const env = require("../../config/env");
 
 const getHealth = async (req, res) => {
-  const dbState = mongoose.connection.readyState;
-  const states = { 0: "disconnected", 1: "connected", 2: "connecting", 3: "disconnecting" };
+  let isConnected = true;
+  try {
+    await sequelize.authenticate();
+  } catch {
+    isConnected = false;
+  }
 
   const uptime = process.uptime();
   const days = Math.floor(uptime / 86400);
@@ -18,8 +22,9 @@ const getHealth = async (req, res) => {
     uptimeSeconds: Math.floor(uptime),
     environment: env.NODE_ENV || "development",
     database: {
-      state: states[dbState] || "unknown",
-      ready: dbState === 1,
+      type: "mysql/mariadb",
+      state: isConnected ? "connected" : "disconnected",
+      ready: isConnected,
     },
     memory: {
       heapUsed: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,

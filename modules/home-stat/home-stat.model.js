@@ -1,52 +1,64 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const homeStatSchema = new mongoose.Schema(
+const HomeStat = sequelize.define(
+  "HomeStat",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     label: {
-      type: String,
-      required: [true, "Stat label is required"],
-      trim: true,
-      maxlength: 100,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     value: {
-      type: String,
-      required: [true, "Stat value is required"],
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     suffix: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(50),
+      defaultValue: "",
     },
     icon: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(255),
+      defaultValue: "",
     },
     color: {
-      type: String,
-      default: "#6366f1",
+      type: DataTypes.STRING(50),
+      defaultValue: "#6366f1",
     },
     description: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(255),
+      defaultValue: "",
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     isActive: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     section: {
-      type: String,
-      enum: ["hero", "stats", "features", "footer"],
-      default: "stats",
+      type: DataTypes.STRING(50),
+      defaultValue: "stats",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "home_stats",
+    timestamps: true,
+  }
 );
 
-homeStatSchema.index({ section: 1, order: 1 });
+enhanceModel(HomeStat);
 
-const HomeStat = mongoose.model("HomeStat", homeStatSchema);
 module.exports = HomeStat;

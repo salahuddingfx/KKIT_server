@@ -1,32 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const webhookDeliverySchema = new mongoose.Schema(
+const WebhookDelivery = sequelize.define(
+  "WebhookDelivery",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     webhook: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Webhook",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     event: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     payload: {
-      type: mongoose.Schema.Types.Mixed,
-      required: true,
+      type: DataTypes.JSON,
+      allowNull: false,
     },
-    statusCode: Number,
-    response: String,
+    statusCode: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+    },
+    response: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
     success: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
-    error: String,
-    duration: Number,
+    error: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    duration: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "webhook_deliveries",
+    timestamps: true,
+  }
 );
 
-webhookDeliverySchema.index({ webhook: 1, createdAt: -1 });
+enhanceModel(WebhookDelivery);
 
-module.exports = mongoose.model("WebhookDelivery", webhookDeliverySchema);
+module.exports = WebhookDelivery;

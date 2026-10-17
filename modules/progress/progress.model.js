@@ -1,41 +1,56 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const progressSchema = new mongoose.Schema(
+const Progress = sequelize.define(
+  "Progress",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     lesson: {
-      type: mongoose.Schema.Types.Mixed,
-      required: true,
+      type: DataTypes.JSON,
+      allowNull: false,
     },
     completed: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     watchTime: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     lastPosition: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     completedAt: {
-      type: Date,
+      type: DataTypes.DATE,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "progresses",
+    timestamps: true,
+  }
 );
 
-progressSchema.index({ user: 1, course: 1, lesson: 1 });
-progressSchema.index({ user: 1, course: 1 });
+enhanceModel(Progress);
 
-module.exports = mongoose.model("Progress", progressSchema);
+module.exports = Progress;

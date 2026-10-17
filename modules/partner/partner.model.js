@@ -1,69 +1,78 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const partnerSchema = new mongoose.Schema(
+const Partner = sequelize.define(
+  "Partner",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     name: {
-      type: String,
-      required: [true, "Partner name is required"],
-      trim: true,
-      maxlength: 100,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(191),
       unique: true,
-      trim: true,
-      lowercase: true,
     },
     logo: {
-      url: { type: String, default: "" },
-      publicId: { type: String, default: "" },
+      type: DataTypes.JSON,
+      defaultValue: { url: "", publicId: "" },
     },
     icon: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(255),
+      defaultValue: "",
     },
     color: {
-      type: String,
-      default: "#6366f1",
+      type: DataTypes.STRING(50),
+      defaultValue: "#6366f1",
     },
     website: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(255),
+      defaultValue: "",
     },
     description: {
-      type: String,
-      default: "",
-      maxlength: 500,
+      type: DataTypes.STRING(500),
+      defaultValue: "",
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     isActive: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     type: {
-      type: String,
-      enum: ["hiring", "technology", "certification", "placement"],
-      default: "hiring",
+      type: DataTypes.STRING(50),
+      defaultValue: "hiring",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "partners",
+    timestamps: true,
+    hooks: {
+      beforeSave: (partner) => {
+        if (!partner.slug || partner.changed("name")) {
+          partner.slug = partner.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+        }
+      },
+    },
+  }
 );
 
-partnerSchema.pre("save", function (next) {
-  if (!this.slug || this.isModified("name")) {
-    this.slug = this.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  }
-  next();
-});
+enhanceModel(Partner);
 
-partnerSchema.index({ name: 1 });
-partnerSchema.index({ isActive: 1, order: 1 });
-
-const Partner = mongoose.model("Partner", partnerSchema);
 module.exports = Partner;

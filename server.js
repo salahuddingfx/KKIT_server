@@ -3,7 +3,6 @@ const env = require("./config/env");
 const connectDB = require("./config/db");
 const { printBanner, startSpinner } = require("./utils/banner");
 const { initSocket } = require("./config/socket");
-const mongoose = require("mongoose");
 
 const fixBadCategoryRefs = async () => {
   const Course = require("./modules/course/course.model");
@@ -11,18 +10,18 @@ const fixBadCategoryRefs = async () => {
   const courses = await Course.find({});
   const catMap = {};
   const categories = await Category.find({});
-  for (const c of categories) catMap[c.name.toString()] = c._id;
+  for (const c of categories) catMap[c.name.toString()] = c._id || c.id;
   let fixed = 0;
   for (const course of courses) {
     const val = course.category;
-    if (val && !mongoose.Types.ObjectId.isValid(val.toString())) {
+    if (val && typeof val === "string" && !/^\d+$/.test(val)) {
       const match = catMap[val.toString()];
       if (match) {
         course.category = match;
         await course.save();
         fixed++;
       } else {
-        course.category = undefined;
+        course.category = null;
         await course.save();
         fixed++;
       }
@@ -32,8 +31,8 @@ const fixBadCategoryRefs = async () => {
 };
 
 const startServer = async () => {
-  const stopSpinner = startSpinner("Connecting to MongoDB...");
-  const mongoHost = await connectDB();
+  const stopSpinner = startSpinner("Connecting to MySQL / MariaDB...");
+  const dbHost = await connectDB();
   stopSpinner();
 
   try { await fixBadCategoryRefs(); } catch (e) { console.error("Category fix skipped:", e.message); }
@@ -43,7 +42,7 @@ const startServer = async () => {
     await printBanner({
       port: env.PORT,
       env:  env.NODE_ENV || "development",
-      mongoHost: mongoHost || "localhost",
+      mongoHost: dbHost || "localhost",
     });
   });
 

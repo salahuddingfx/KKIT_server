@@ -1,76 +1,76 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const liveClassSchema = new mongoose.Schema(
+const LiveClass = sequelize.define(
+  "LiveClass",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: [true, "Live class title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: [true, "Course is required"],
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     instructor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "Instructor is required"],
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     scheduledAt: {
-      type: Date,
-      required: [true, "Scheduled time is required"],
+      type: DataTypes.DATE,
+      allowNull: false,
     },
     duration: {
-      type: Number,
-      default: 60,
-      min: 1,
+      type: DataTypes.INTEGER,
+      defaultValue: 60,
     },
     meetingUrl: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(500),
+      defaultValue: "",
     },
     meetingId: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(100),
+      defaultValue: "",
     },
     meetingPassword: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(100),
+      defaultValue: "",
     },
     description: {
-      type: String,
-      default: "",
-      maxlength: 1000,
+      type: DataTypes.TEXT,
+      defaultValue: "",
     },
     status: {
-      type: String,
-      enum: ["scheduled", "live", "completed", "cancelled"],
-      default: "scheduled",
+      type: DataTypes.STRING(50),
+      defaultValue: "scheduled",
     },
-    attendees: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    attendees: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     maxAttendees: {
-      type: Number,
-      default: 100,
-    },
-    recording: {
-      type: String,
-      default: "",
+      type: DataTypes.INTEGER,
+      defaultValue: 100,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "live_classes",
+    timestamps: true,
+  }
 );
 
-liveClassSchema.index({ scheduledAt: 1 });
-liveClassSchema.index({ course: 1, status: 1 });
-liveClassSchema.index({ instructor: 1 });
-liveClassSchema.index({ status: 1, scheduledAt: 1 });
+enhanceModel(LiveClass);
 
-const LiveClass = mongoose.model("LiveClass", liveClassSchema);
 module.exports = LiveClass;

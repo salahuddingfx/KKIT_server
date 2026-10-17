@@ -1,31 +1,53 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const siteSettingSchema = new mongoose.Schema(
+const SiteSetting = sequelize.define(
+  "SiteSetting",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     key: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
       unique: true,
-      trim: true,
     },
     value: {
-      type: mongoose.Schema.Types.Mixed,
-      required: true,
+      type: DataTypes.JSON,
+      allowNull: false,
     },
     type: {
-      type: String,
-      enum: ["string", "boolean", "number", "json", "image"],
-      default: "string",
+      type: DataTypes.STRING(50),
+      defaultValue: "string",
     },
     category: {
-      type: String,
-      enum: ["general", "branding", "contact", "social", "seo", "footer", "navbar"],
-      default: "general",
+      type: DataTypes.STRING(50),
+      defaultValue: "general",
     },
-    label: String,
-    description: String,
+    label: {
+      type: DataTypes.STRING(200),
+      defaultValue: null,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "site_settings",
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("SiteSetting", siteSettingSchema);
+enhanceModel(SiteSetting);
+
+module.exports = SiteSetting;

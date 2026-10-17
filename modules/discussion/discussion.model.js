@@ -1,81 +1,76 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const replySchema = new mongoose.Schema(
+const Discussion = sequelize.define(
+  "Discussion",
   {
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    content: {
-      type: String,
-      required: [true, "Reply content is required"],
-    },
-    likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
       },
-    ],
-    createdAt: {
-      type: Date,
-      default: Date.now,
     },
-  },
-  { _id: true }
-);
-
-const discussionSchema = new mongoose.Schema(
-  {
     title: {
-      type: String,
-      required: [true, "Discussion title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     content: {
-      type: String,
-      required: [true, "Discussion content is required"],
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     lessonId: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING(100),
+      defaultValue: null,
     },
     author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     type: {
-      type: String,
-      enum: ["question", "discussion", "announcement"],
-      default: "discussion",
+      type: DataTypes.STRING(50),
+      defaultValue: "discussion",
     },
-    tags: [String],
-    replies: [replySchema],
-    isResolved: {
-      type: Boolean,
-      default: false,
+    tags: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    replies: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    likes: {
+      type: DataTypes.JSON,
+      defaultValue: [],
     },
     isPinned: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isLocked: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     views: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "discussions",
+    timestamps: true,
+  }
 );
 
-discussionSchema.index({ title: "text", content: "text" });
-discussionSchema.index({ course: 1, lessonId: 1, createdAt: -1 });
-discussionSchema.index({ author: 1 });
+enhanceModel(Discussion);
 
-module.exports = mongoose.model("Discussion", discussionSchema);
+module.exports = Discussion;

@@ -1,42 +1,56 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const notificationSchema = new mongoose.Schema(
+const Notification = sequelize.define(
+  "Notification",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     title: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     body: {
-      type: String,
-      required: true,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     type: {
-      type: String,
-      enum: ["info", "success", "warning", "course", "payment", "system"],
-      default: "info",
+      type: DataTypes.STRING(50),
+      defaultValue: "info",
     },
     data: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {},
+      type: DataTypes.JSON,
+      defaultValue: {},
     },
     read: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     readAt: {
-      type: Date,
+      type: DataTypes.DATE,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "notifications",
+    timestamps: true,
+  }
 );
 
-notificationSchema.index({ user: 1, read: 1 });
-notificationSchema.index({ createdAt: -1 });
+enhanceModel(Notification);
 
-module.exports = mongoose.model("Notification", notificationSchema);
+module.exports = Notification;

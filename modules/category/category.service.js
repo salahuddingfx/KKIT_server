@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
 const Category = require("./category.model");
+const Course = require("../course/course.model");
 
 const getAll = async (query = {}) => {
   const filter = {};
@@ -31,16 +31,14 @@ const remove = async (id) => {
 };
 
 const updateCourseCount = async (categoryId) => {
-  const Course = mongoose.model("Course");
   const count = await Course.countDocuments({ category: categoryId });
   return Category.findByIdAndUpdate(categoryId, { courseCount: count }, { new: true });
 };
 
 const updateAllCounts = async () => {
-  const Course = mongoose.model("Course");
   const categories = await Category.find();
   for (const cat of categories) {
-    const count = await Course.countDocuments({ category: cat._id });
+    const count = await Course.countDocuments({ category: cat._id || cat.id });
     cat.courseCount = count;
     await cat.save();
   }

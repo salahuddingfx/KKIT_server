@@ -1,114 +1,76 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const submissionSchema = new mongoose.Schema(
+const Submission = sequelize.define(
+  "Submission",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     assignment: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Assignment",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     attemptNumber: {
-      type: Number,
-      default: 1,
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
     },
     textContent: {
-      type: String,
+      type: DataTypes.TEXT,
+      defaultValue: null,
     },
-    links: [
-      {
-        title: String,
-        url: String,
-      },
-    ],
-    files: [
-      {
-        title: String,
-        url: String,
-        publicId: String,
-        fileType: String,
-        fileSize: Number,
-      },
-    ],
+    links: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    files: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     submittedAt: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     isLate: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     status: {
-      type: String,
-      enum: ["submitted", "graded", "returned", "resubmitted"],
-      default: "submitted",
+      type: DataTypes.STRING(50),
+      defaultValue: "submitted",
     },
     grade: {
-      points: { type: Number, min: 0 },
-      percentage: { type: Number, min: 0, max: 100 },
-      letter: { type: String },
-      gradedAt: Date,
-      gradedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     feedback: {
-      text: String,
-      attachments: [
-        {
-          title: String,
-          url: String,
-        },
-      ],
-      givenAt: Date,
-      givenBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    },
-    rubricScores: [
-      {
-        criterion: String,
-        maxPoints: Number,
-        awardedPoints: Number,
-        comment: String,
-      },
-    ],
-    milestoneProgress: [
-      {
-        milestoneTitle: String,
-        completed: { type: Boolean, default: false },
-        completedAt: Date,
-        awardedPoints: { type: Number, default: 0 },
-      },
-    ],
-    plagiarismCheck: {
-      score: Number,
-      checkedAt: Date,
-    },
-    returnNote: String,
-    returnedAt: Date,
-    returnedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.TEXT,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "submissions",
+    timestamps: true,
+  }
 );
 
-submissionSchema.index({ assignment: 1, student: 1 });
-submissionSchema.index({ student: 1 });
-submissionSchema.index({ course: 1 });
-submissionSchema.index({ status: 1 });
+enhanceModel(Submission);
 
-module.exports = mongoose.model("Submission", submissionSchema);
+module.exports = Submission;

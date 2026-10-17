@@ -1,59 +1,80 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const subscriptionSchema = new mongoose.Schema(
+const Subscription = sequelize.define(
+  "Subscription",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     plan: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Pricing",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     status: {
-      type: String,
-      enum: ["active", "cancelled", "paused", "expired"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     startDate: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     endDate: {
-      type: Date,
-      required: true,
+      type: DataTypes.DATE,
+      allowNull: false,
     },
-    nextBillingDate: Date,
+    nextBillingDate: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     paymentMethod: {
-      type: String,
-      enum: ["stripe", "sslcommerz", "bkash", "manual"],
-      default: "manual",
+      type: DataTypes.STRING(50),
+      defaultValue: "manual",
     },
-    stripeSubscriptionId: String,
-    stripeCustomerId: String,
+    stripeSubscriptionId: {
+      type: DataTypes.STRING(255),
+      defaultValue: null,
+    },
+    stripeCustomerId: {
+      type: DataTypes.STRING(255),
+      defaultValue: null,
+    },
     amount: {
-      type: Number,
-      required: true,
+      type: DataTypes.FLOAT,
+      allowNull: false,
     },
     currency: {
-      type: String,
-      default: "USD",
+      type: DataTypes.STRING(10),
+      defaultValue: "USD",
     },
     autoRenew: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
-    cancelledAt: Date,
-    pauseStartDate: Date,
-    pauseEndDate: Date,
+    cancelledAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "subscriptions",
+    timestamps: true,
+  }
 );
 
-subscriptionSchema.index({ user: 1 });
-subscriptionSchema.index({ status: 1 });
-subscriptionSchema.index({ stripeSubscriptionId: 1 });
+enhanceModel(Subscription);
 
-module.exports = mongoose.model("Subscription", subscriptionSchema);
+module.exports = Subscription;

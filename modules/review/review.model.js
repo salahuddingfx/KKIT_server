@@ -1,51 +1,61 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const reviewSchema = new mongoose.Schema(
+const Review = sequelize.define(
+  "Review",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     rating: {
-      type: Number,
-      required: [true, "Rating is required"],
-      min: 1,
-      max: 5,
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      validate: { min: 1, max: 5 },
     },
     title: {
-      type: String,
-      trim: true,
-      maxlength: 100,
+      type: DataTypes.STRING(100),
+      defaultValue: null,
     },
     comment: {
-      type: String,
-      maxlength: 1000,
+      type: DataTypes.TEXT,
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      type: DataTypes.STRING(50),
+      defaultValue: "pending",
     },
     helpful: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     reportCount: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "reviews",
+    timestamps: true,
+  }
 );
 
-reviewSchema.index({ course: 1, user: 1 }, { unique: true });
-reviewSchema.index({ course: 1 });
-reviewSchema.index({ status: 1 });
+enhanceModel(Review);
 
-module.exports = mongoose.model("Review", reviewSchema);
+module.exports = Review;

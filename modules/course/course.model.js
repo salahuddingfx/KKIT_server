@@ -1,215 +1,174 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 const { slugify } = require("../../utils/helpers");
 
-const lessonSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: String,
-  videoUrl: String,
-  videoProvider: {
-    type: String,
-    enum: ["bunny", "cloudinary", "youtube", "vimeo", "hls", "mp4"],
-    default: "bunny",
-  },
-  bunnyLibraryId: String,
-  bunnyVideoId: String,
-  chapters: [
-    {
-      time: { type: Number, required: true },
-      label: { type: String, required: true },
-    },
-  ],
-  duration: Number,
-  order: { type: Number, default: 0 },
-  isFree: { type: Boolean, default: false },
-  notes: String,
-  codeExamples: [
-    {
-      title: String,
-      language: { type: String, default: "javascript" },
-      code: String,
-      description: String,
-    },
-  ],
-  attachments: [
-    {
-      title: String,
-      url: String,
-      type: { type: String, enum: ["pdf", "link", "file", "zip", "image"] },
-      size: Number,
-    },
-  ],
-  resources: [
-    {
-      title: String,
-      url: String,
-      type: { type: String, enum: ["pdf", "link", "file"] },
-    },
-  ],
-});
-
-const moduleSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: String,
-  order: { type: Number, default: 0 },
-  lessons: [lessonSchema],
-});
-
-const courseSchema = new mongoose.Schema(
+const Course = sequelize.define(
+  "Course",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: [true, "Course title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(191),
       unique: true,
-      index: true,
     },
     description: {
-      type: String,
-      required: [true, "Course description is required"],
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     shortDescription: {
-      type: String,
-      maxlength: 300,
+      type: DataTypes.STRING(500),
+      defaultValue: null,
     },
     thumbnail: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     trailer: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     instructor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    mentors: [
-      {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        assignedAt: { type: Date, default: Date.now },
-      },
-    ],
-    trainers: [
-      {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        assignedAt: { type: Date, default: Date.now },
-      },
-    ],
+    mentors: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    trainers: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      required: true,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    tags: [String],
+    tags: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     level: {
-      type: String,
-      enum: ["beginner", "intermediate", "advanced"],
-      default: "beginner",
+      type: DataTypes.STRING(50),
+      defaultValue: "beginner",
     },
     price: {
-      type: Number,
-      required: true,
-      min: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     discountPrice: {
-      type: Number,
-      min: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: null,
     },
     currency: {
-      type: String,
-      default: "USD",
+      type: DataTypes.STRING(10),
+      defaultValue: "USD",
     },
-    modules: [moduleSchema],
+    modules: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     totalDuration: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     totalLessons: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     enrolledStudents: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     rating: {
-      average: { type: Number, default: 0 },
-      count: { type: Number, default: 0 },
+      type: DataTypes.JSON,
+      defaultValue: { average: 0, count: 0 },
     },
-    prerequisites: [String],
-    learningOutcomes: [String],
-    techStack: [
-      {
-        name: { type: String, required: true },
-        icon: String,
-        color: String,
-      },
-    ],
-    projects: [
-      {
-        title: { type: String, required: true },
-        description: String,
-        image: String,
-        techUsed: [String],
-        link: String,
-      },
-    ],
-    highlights: [String],
+    prerequisites: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    learningOutcomes: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    techStack: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    projects: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    highlights: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     language: {
-      type: String,
-      default: "Bangla",
+      type: DataTypes.STRING(50),
+      defaultValue: "Bangla",
     },
     certificateIncluded: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     status: {
-      type: String,
-      enum: ["draft", "published", "archived"],
-      default: "draft",
+      type: DataTypes.STRING(50),
+      defaultValue: "draft",
     },
     isFeatured: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     seo: {
-      title: String,
-      description: String,
-      keywords: [String],
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "courses",
+    timestamps: true,
+    hooks: {
+      beforeSave: (course) => {
+        if (!course.slug || course.changed("title")) {
+          course.slug = slugify(course.title);
+        }
+        if (Array.isArray(course.modules)) {
+          let totalDuration = 0;
+          let totalLessons = 0;
+          course.modules.forEach((mod) => {
+            if (Array.isArray(mod.lessons)) {
+              mod.lessons.forEach((lesson) => {
+                totalDuration += Number(lesson.duration) || 0;
+                totalLessons += 1;
+              });
+            }
+          });
+          course.totalDuration = totalDuration;
+          course.totalLessons = totalLessons;
+        }
+      },
+    },
+  }
 );
 
-courseSchema.pre("save", function (next) {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title);
-  }
-  // Recalculate totals
-  let totalDuration = 0;
-  let totalLessons = 0;
-  this.modules.forEach((mod) => {
-    mod.lessons.forEach((lesson) => {
-      totalDuration += lesson.duration || 0;
-      totalLessons += 1;
-    });
-  });
-  this.totalDuration = totalDuration;
-  this.totalLessons = totalLessons;
-  next();
-});
+enhanceModel(Course);
 
-courseSchema.index({ title: "text", description: "text" }, { language_override: "dummy_language_override" });
-courseSchema.index({ category: 1 });
-courseSchema.index({ status: 1 });
-
-module.exports = mongoose.model("Course", courseSchema);
+module.exports = Course;

@@ -1,87 +1,100 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 const { slugify } = require("../../utils/helpers");
 
-const blogSchema = new mongoose.Schema(
+const Blog = sequelize.define(
+  "Blog",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: [true, "Blog title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(191),
       unique: true,
     },
     content: {
-      type: String,
-      required: [true, "Blog content is required"],
+      type: DataTypes.TEXT("long"),
+      allowNull: false,
     },
     excerpt: {
-      type: String,
-      maxlength: 300,
+      type: DataTypes.STRING(500),
+      defaultValue: null,
     },
     thumbnail: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     category: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
-    tags: [String],
+    tags: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     status: {
-      type: String,
-      enum: ["draft", "pending", "published", "rejected", "archived"],
-      default: "pending",
+      type: DataTypes.STRING(50),
+      defaultValue: "pending",
     },
     rejectionReason: {
-      type: String,
-      default: "",
+      type: DataTypes.TEXT,
+      defaultValue: "",
     },
     views: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     likes: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     featured: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     seo: {
-      title: String,
-      description: String,
-      keywords: [String],
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    publishedAt: Date,
+    publishedAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "blogs",
+    timestamps: true,
+    hooks: {
+      beforeSave: (blog) => {
+        if (!blog.slug || blog.changed("title")) {
+          blog.slug = slugify(blog.title);
+        }
+      },
+    },
+  }
 );
 
-blogSchema.pre("save", function (next) {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title);
-  }
-  if (this.isModified("status") && this.status === "published" && !this.publishedAt) {
-    this.publishedAt = new Date();
-  }
-  next();
-});
+enhanceModel(Blog);
 
-blogSchema.index({ title: "text", content: "text" });
-blogSchema.index({ status: 1 });
-
-module.exports = mongoose.model("Blog", blogSchema);
+module.exports = Blog;

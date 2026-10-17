@@ -1,65 +1,49 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const sectionItemSchema = new mongoose.Schema(
+const PageContent = sequelize.define(
+  "PageContent",
   {
-    title: String,
-    description: String,
-    icon: String,
-    image: {
-      url: String,
-      publicId: String,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    url: String,
-    value: mongoose.Schema.Types.Mixed,
-  },
-  { _id: false }
-);
-
-const sectionSchema = new mongoose.Schema(
-  {
-    key: {
-      type: String,
-      required: true,
-    },
-    title: String,
-    subtitle: String,
-    content: String,
-    image: {
-      url: String,
-      publicId: String,
-    },
-    videoUrl: String,
-    items: [sectionItemSchema],
-    stats: [
-      {
-        label: String,
-        value: String,
-        icon: String,
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
       },
-    ],
-    meta: mongoose.Schema.Types.Mixed,
-  },
-  { _id: false }
-);
-
-const pageContentSchema = new mongoose.Schema(
-  {
+    },
     page: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
       unique: true,
-      trim: true,
     },
-    title: String,
-    description: String,
-    sections: [sectionSchema],
+    title: {
+      type: DataTypes.STRING(255),
+      defaultValue: null,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    sections: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     seo: {
-      title: String,
-      description: String,
-      keywords: [String],
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "page_contents",
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("PageContent", pageContentSchema);
+enhanceModel(PageContent);
+
+module.exports = PageContent;

@@ -1,42 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const contactSubmissionSchema = new mongoose.Schema(
+const ContactSubmission = sequelize.define(
+  "ContactSubmission",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     name: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     email: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
+      type: DataTypes.STRING(191),
+      allowNull: false,
     },
-    phone: String,
+    phone: {
+      type: DataTypes.STRING(50),
+      defaultValue: null,
+    },
     subject: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING(255),
+      defaultValue: null,
     },
     message: {
-      type: String,
-      required: true,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     status: {
-      type: String,
-      enum: ["new", "read", "replied", "archived"],
-      default: "new",
+      type: DataTypes.STRING(50),
+      defaultValue: "new",
     },
-    repliedAt: Date,
+    repliedAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     repliedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "contact_submissions",
+    timestamps: true,
+  }
 );
 
-contactSubmissionSchema.index({ status: 1 });
-contactSubmissionSchema.index({ email: 1 });
+enhanceModel(ContactSubmission);
 
-module.exports = mongoose.model("ContactSubmission", contactSubmissionSchema);
+module.exports = ContactSubmission;

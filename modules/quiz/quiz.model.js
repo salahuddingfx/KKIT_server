@@ -1,56 +1,64 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const quizSchema = new mongoose.Schema(
+const Quiz = sequelize.define(
+  "Quiz",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     lesson: {
-      type: mongoose.Schema.Types.Mixed,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     title: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
-    description: String,
-    questions: [
-      {
-        question: { type: String, required: true },
-        type: {
-          type: String,
-          enum: ["mcq", "true-false", "short-answer"],
-          default: "mcq",
-        },
-        options: [String],
-        correctAnswer: { type: String, required: true },
-        points: { type: Number, default: 1 },
-        explanation: String,
-      },
-    ],
+    description: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    questions: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     timeLimit: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     passingScore: {
-      type: Number,
-      default: 60,
+      type: DataTypes.INTEGER,
+      defaultValue: 60,
     },
     maxAttempts: {
-      type: Number,
-      default: 3,
+      type: DataTypes.INTEGER,
+      defaultValue: 3,
     },
     status: {
-      type: String,
-      enum: ["draft", "published"],
-      default: "draft",
+      type: DataTypes.STRING(50),
+      defaultValue: "draft",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "quizzes",
+    timestamps: true,
+  }
 );
 
-quizSchema.index({ course: 1 });
+enhanceModel(Quiz);
 
-module.exports = mongoose.model("Quiz", quizSchema);
+module.exports = Quiz;

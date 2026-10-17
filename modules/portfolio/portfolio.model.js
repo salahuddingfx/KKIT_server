@@ -1,88 +1,100 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const portfolioSchema = new mongoose.Schema(
+const Portfolio = sequelize.define(
+  "Portfolio",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(200),
       unique: true,
     },
     description: {
-      type: String,
-      required: true,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     shortDescription: {
-      type: String,
-      maxlength: 300,
+      type: DataTypes.STRING(300),
+      defaultValue: null,
     },
     projectType: {
-      type: String,
-      enum: ["client", "student", "internal"],
-      default: "client",
+      type: DataTypes.STRING(50),
+      defaultValue: "client",
     },
     category: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
-    client: String,
-    duration: String,
-    technologies: [String],
-    liveUrl: String,
-    repoUrl: String,
+    client: {
+      type: DataTypes.STRING(150),
+      defaultValue: null,
+    },
+    duration: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
+    technologies: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    liveUrl: {
+      type: DataTypes.STRING(500),
+      defaultValue: null,
+    },
+    repoUrl: {
+      type: DataTypes.STRING(500),
+      defaultValue: null,
+    },
     image: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    gallery: [
-      {
-        url: String,
-        publicId: String,
-        caption: String,
-      },
-    ],
-    // Results / metrics for client projects
+    gallery: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     metrics: {
-      label: String,   // e.g. "Revenue Increase", "Users Gained"
-      value: String,   // e.g. "250%", "10K+"
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    // Client testimonial
     testimonial: {
-      quote: String,
-      author: String,
-      designation: String,
-      company: String,
-      avatar: { url: String, publicId: String },
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    // For student projects — link to the actual student project
-    studentProject: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
+    isFeatured: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
-    studentName: String,
-    courseName: String,
-    status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
-    },
-    featured: {
-      type: Boolean,
-      default: false,
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "portfolios",
+    timestamps: true,
+  }
 );
 
-portfolioSchema.index({ title: "text", description: "text" });
+enhanceModel(Portfolio);
 
-module.exports = mongoose.model("Portfolio", portfolioSchema);
+module.exports = Portfolio;

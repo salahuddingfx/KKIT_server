@@ -1,60 +1,71 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const categorySchema = new mongoose.Schema(
+const Category = sequelize.define(
+  "Category",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     name: {
-      type: String,
-      required: [true, "Category name is required"],
+      type: DataTypes.STRING(100),
+      allowNull: false,
       unique: true,
-      trim: true,
-      maxlength: 100,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(191),
       unique: true,
-      trim: true,
-      lowercase: true,
     },
     description: {
-      type: String,
-      default: "",
-      maxlength: 500,
+      type: DataTypes.TEXT,
+      defaultValue: "",
     },
     icon: {
-      type: String,
-      default: "",
+      type: DataTypes.STRING(255),
+      defaultValue: "",
     },
     color: {
-      type: String,
-      default: "#6366f1",
+      type: DataTypes.STRING(50),
+      defaultValue: "#6366f1",
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     isActive: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     courseCount: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "categories",
+    timestamps: true,
+    hooks: {
+      beforeSave: (category) => {
+        if (!category.slug || category.changed("name")) {
+          category.slug = category.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+        }
+      },
+    },
+  }
 );
 
-categorySchema.pre("save", function (next) {
-  if (!this.slug || this.isModified("name")) {
-    this.slug = this.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  }
-  next();
-});
+enhanceModel(Category);
 
-categorySchema.index({ isActive: 1, order: 1 });
-
-const Category = mongoose.model("Category", categorySchema);
 module.exports = Category;

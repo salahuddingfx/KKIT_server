@@ -1,59 +1,84 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 const { slugify } = require("../../utils/helpers");
 
-const serviceSchema = new mongoose.Schema(
+const Service = sequelize.define(
+  "Service",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: [true, "Service title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(191),
       unique: true,
     },
     description: {
-      type: String,
-      required: [true, "Service description is required"],
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     shortDescription: {
-      type: String,
-      maxlength: 300,
+      type: DataTypes.STRING(500),
+      defaultValue: null,
     },
-    icon: String,
+    icon: {
+      type: DataTypes.STRING(255),
+      defaultValue: null,
+    },
     image: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    features: [String],
-    technologies: [String],
+    features: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    technologies: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     pricing: {
-      startingAt: Number,
-      period: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     seo: {
-      title: String,
-      description: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "services",
+    timestamps: true,
+    hooks: {
+      beforeSave: (service) => {
+        if (!service.slug || service.changed("title")) {
+          service.slug = slugify(service.title);
+        }
+      },
+    },
+  }
 );
 
-serviceSchema.pre("save", function (next) {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title);
-  }
-  next();
-});
+enhanceModel(Service);
 
-module.exports = mongoose.model("Service", serviceSchema);
+module.exports = Service;

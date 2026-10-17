@@ -1,120 +1,85 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const assignmentSchema = new mongoose.Schema(
+const Assignment = sequelize.define(
+  "Assignment",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: [true, "Assignment title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     description: {
-      type: String,
-      required: [true, "Description is required"],
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     module: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING(255),
+      defaultValue: null,
     },
-    instructions: String,
-    attachments: [
-      {
-        title: String,
-        url: String,
-        type: { type: String, enum: ["pdf", "link", "file", "image"] },
-      },
-    ],
+    instructions: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    attachments: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     maxPoints: {
-      type: Number,
-      required: true,
-      min: 1,
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 100,
     },
     passingPoints: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
-    rubricCriteria: [
-      {
-        criterion: { type: String, required: true },
-        maxPoints: { type: Number, required: true },
-        description: String,
-      },
-    ],
-    milestones: [
-      {
-        title: { type: String, required: true },
-        description: String,
-        maxPoints: { type: Number, default: 0 },
-        order: { type: Number, default: 0 },
-      },
-    ],
+    rubricCriteria: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    milestones: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     dueDate: {
-      type: Date,
-      required: [true, "Due date is required"],
+      type: DataTypes.DATE,
+      allowNull: false,
     },
     allowLateSubmission: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
-    latePenaltyPerDay: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
-    },
-    submissionType: {
-      type: String,
-      enum: ["file", "text", "link", "file_and_text", "any"],
-      default: "file_and_text",
-    },
-    allowedFileTypes: [String],
-    maxFileSize: {
-      type: Number,
-      default: 10 * 1024 * 1024, // 10MB
-    },
-    maxSubmissions: {
-      type: Number,
-      default: 1,
-    },
-    assignedTo: [
-      {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        assignedAt: { type: Date, default: Date.now },
-      },
-    ],
-    assignedToAll: {
-      type: Boolean,
-      default: true,
+    latePenaltyPercent: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     status: {
-      type: String,
-      enum: ["draft", "published", "archived"],
-      default: "draft",
-    },
-    totalSubmissions: {
-      type: Number,
-      default: 0,
-    },
-    averageGrade: {
-      type: Number,
-      default: 0,
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.STRING(50),
+      defaultValue: "published",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "assignments",
+    timestamps: true,
+  }
 );
 
-assignmentSchema.index({ course: 1 });
-assignmentSchema.index({ status: 1 });
-assignmentSchema.index({ dueDate: 1 });
+enhanceModel(Assignment);
 
-module.exports = mongoose.model("Assignment", assignmentSchema);
+module.exports = Assignment;

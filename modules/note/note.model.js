@@ -1,39 +1,52 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const noteSchema = new mongoose.Schema(
+const Note = sequelize.define(
+  "Note",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     lessonId: {
-      type: String,
-      required: [true, "Lesson ID is required"],
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     timestamp: {
-      type: Number,
-      default: null,
+      type: DataTypes.FLOAT,
+      defaultValue: null,
     },
     content: {
-      type: String,
-      required: [true, "Note content is required"],
-      maxlength: 2000,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     isPinned: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "notes",
+    timestamps: true,
+  }
 );
 
-noteSchema.index({ user: 1, course: 1, lessonId: 1 });
-noteSchema.index({ user: 1, course: 1, isPinned: -1, createdAt: -1 });
+enhanceModel(Note);
 
-module.exports = mongoose.model("Note", noteSchema);
+module.exports = Note;

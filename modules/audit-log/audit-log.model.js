@@ -1,65 +1,108 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const auditLogSchema = new mongoose.Schema(
+const AuditLog = sequelize.define(
+  "AuditLog",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     timestamp: {
-      type: Date,
-      default: Date.now,
-      index: true,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     action: {
-      type: String,
-      required: true,
-      index: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     category: {
-      type: String,
-      enum: ["visitor", "auth", "payment", "admin", "lead", "system"],
-      default: "visitor",
-      index: true,
+      type: DataTypes.STRING(50),
+      defaultValue: "visitor",
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
-    userName: String,
-    userEmail: String,
-    userPhone: String,
+    userName: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
+    userEmail: {
+      type: DataTypes.STRING(191),
+      defaultValue: null,
+    },
+    userPhone: {
+      type: DataTypes.STRING(50),
+      defaultValue: null,
+    },
     ip: {
-      type: String,
-      index: true,
+      type: DataTypes.STRING(50),
+      defaultValue: null,
     },
     country: {
-      type: String,
-      default: "Bangladesh",
-      index: true,
+      type: DataTypes.STRING(100),
+      defaultValue: "Bangladesh",
     },
     countryCode: {
-      type: String,
-      default: "BD",
+      type: DataTypes.STRING(10),
+      defaultValue: "BD",
     },
-    city: String,
-    userAgent: String,
-    browser: String,
-    os: String,
-    device: String,
-    path: String,
-    method: String,
-    statusCode: Number,
+    city: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
+    userAgent: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    browser: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
+    os: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
+    device: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
+    path: {
+      type: DataTypes.STRING(500),
+      defaultValue: null,
+    },
+    method: {
+      type: DataTypes.STRING(20),
+      defaultValue: null,
+    },
+    statusCode: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+    },
     details: {
-      type: mongoose.Schema.Types.Mixed,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["success", "warning", "error", "info"],
-      default: "info",
-      index: true,
+      type: DataTypes.STRING(50),
+      defaultValue: "info",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "audit_logs",
+    timestamps: true,
+  }
 );
 
-auditLogSchema.index({ createdAt: -1 });
-auditLogSchema.index({ country: 1, action: 1 });
+enhanceModel(AuditLog);
 
-module.exports = mongoose.model("AuditLog", auditLogSchema);
+module.exports = AuditLog;

@@ -1,47 +1,61 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const badgeSchema = new mongoose.Schema(
+const Gamification = sequelize.define(
+  "Gamification",
   {
-    badgeId: { type: String, required: true },
-    name: { type: String, required: true },
-    description: String,
-    icon: String,
-    earnedAt: { type: Date, default: Date.now },
-  },
-  { _id: false }
-);
-
-const gamificationSchema = new mongoose.Schema(
-  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
       unique: true,
     },
-    points: { type: Number, default: 0 },
-    level: { type: Number, default: 1 },
-    badges: [badgeSchema],
-    stats: {
-      lessonsCompleted: { type: Number, default: 0 },
-      coursesCompleted: { type: Number, default: 0 },
-      assignmentsSubmitted: { type: Number, default: 0 },
-      projectsSubmitted: { type: Number, default: 0 },
-      reviewsWritten: { type: Number, default: 0 },
-      discussionsCreated: { type: Number, default: 0 },
-      totalWatchTime: { type: Number, default: 0 },
+    points: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
-    pointsHistory: [
-      {
-        amount: Number,
-        reason: String,
-        date: { type: Date, default: Date.now },
+    level: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+    },
+    badges: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    stats: {
+      type: DataTypes.JSON,
+      defaultValue: {
+        lessonsCompleted: 0,
+        coursesCompleted: 0,
+        assignmentsSubmitted: 0,
+        projectsSubmitted: 0,
+        reviewsWritten: 0,
+        discussionsCreated: 0,
+        totalWatchTime: 0,
       },
-    ],
+    },
+    pointsHistory: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "gamifications",
+    timestamps: true,
+  }
 );
 
-gamificationSchema.index({ points: -1 });
+enhanceModel(Gamification);
 
-module.exports = mongoose.model("Gamification", gamificationSchema);
+module.exports = Gamification;

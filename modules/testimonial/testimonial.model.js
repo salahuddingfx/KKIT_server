@@ -1,54 +1,72 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const testimonialSchema = new mongoose.Schema(
+const Testimonial = sequelize.define(
+  "Testimonial",
   {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    designation: String,
-    company: String,
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    designation: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
+    company: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
     avatar: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     content: {
-      type: String,
-      required: [true, "Testimonial content is required"],
-      maxlength: 1000,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     rating: {
-      type: Number,
-      min: 1,
-      max: 5,
+      type: DataTypes.INTEGER,
+      defaultValue: 5,
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      type: DataTypes.STRING(50),
+      defaultValue: "approved",
     },
     featured: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "testimonials",
+    timestamps: true,
+  }
 );
 
-testimonialSchema.index({ status: 1 });
-testimonialSchema.index({ featured: 1 });
+enhanceModel(Testimonial);
 
-module.exports = mongoose.model("Testimonial", testimonialSchema);
+module.exports = Testimonial;

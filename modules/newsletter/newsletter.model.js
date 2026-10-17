@@ -1,38 +1,57 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const newsletterSchema = new mongoose.Schema(
+const Newsletter = sequelize.define(
+  "Newsletter",
   {
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"],
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    name: String,
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
+    email: {
+      type: DataTypes.STRING(191),
+      allowNull: false,
+      unique: true,
+    },
+    name: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["active", "unsubscribed"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     subscribedAt: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
-    unsubscribedAt: Date,
+    unsubscribedAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     source: {
-      type: String,
-      default: "website",
+      type: DataTypes.STRING(50),
+      defaultValue: "website",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "newsletters",
+    timestamps: true,
+  }
 );
 
-newsletterSchema.index({ status: 1 });
+enhanceModel(Newsletter);
 
-module.exports = mongoose.model("Newsletter", newsletterSchema);
+module.exports = Newsletter;

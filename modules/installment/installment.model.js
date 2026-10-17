@@ -1,57 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const installmentSchema = new mongoose.Schema(
+const Installment = sequelize.define(
+  "Installment",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     totalAmount: {
-      type: Number,
-      required: true,
+      type: DataTypes.FLOAT,
+      allowNull: false,
     },
     numberOfInstallments: {
-      type: Number,
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     installmentAmount: {
-      type: Number,
-      required: true,
+      type: DataTypes.FLOAT,
+      allowNull: false,
     },
-    installments: [
-      {
-        number: Number,
-        amount: Number,
-        dueDate: Date,
-        status: {
-          type: String,
-          enum: ["pending", "paid", "overdue"],
-          default: "pending",
-        },
-        paidAt: Date,
-        transactionId: String,
-      },
-    ],
+    installments: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     status: {
-      type: String,
-      enum: ["active", "completed", "defaulted"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     startDate: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "installments",
+    timestamps: true,
+  }
 );
 
-installmentSchema.index({ user: 1 });
-installmentSchema.index({ status: 1 });
+enhanceModel(Installment);
 
-module.exports = mongoose.model("Installment", installmentSchema);
+module.exports = Installment;

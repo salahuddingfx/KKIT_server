@@ -1,30 +1,45 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const subscriberSchema = new mongoose.Schema(
+const Subscriber = sequelize.define(
+  "Subscriber",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     email: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(191),
+      allowNull: false,
       unique: true,
-      trim: true,
-      lowercase: true,
     },
     name: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING(100),
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["active", "unsubscribed"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     source: {
-      type: String,
-      enum: ["website", "blog", "popup", "manual"],
-      default: "website",
+      type: DataTypes.STRING(50),
+      defaultValue: "website",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "subscribers",
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("Subscriber", subscriberSchema);
+enhanceModel(Subscriber);
+
+module.exports = Subscriber;

@@ -1,75 +1,78 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 const { PAYMENT_STATUS } = require("../../utils/constants");
 
-const paymentSchema = new mongoose.Schema(
+const Payment = sequelize.define(
+  "Payment",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     amount: {
-      type: Number,
-      required: true,
-      min: 0,
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
     },
     currency: {
-      type: String,
-      default: "BDT",
+      type: DataTypes.STRING(10),
+      defaultValue: "BDT",
     },
     status: {
-      type: String,
-      enum: Object.values(PAYMENT_STATUS),
-      default: PAYMENT_STATUS.PENDING,
+      type: DataTypes.STRING(50),
+      defaultValue: PAYMENT_STATUS ? PAYMENT_STATUS.PENDING : "pending",
     },
     method: {
-      type: String,
-      enum: ["bkash", "nagad", "bank_transfer", "manual"],
-      required: true,
+      type: DataTypes.STRING(50),
+      allowNull: false,
     },
-    transactionId: String,
-    paymentIntentId: String,
+    transactionId: {
+      type: DataTypes.STRING(255),
+      defaultValue: null,
+    },
+    paymentIntentId: {
+      type: DataTypes.STRING(255),
+      defaultValue: null,
+    },
     billingDetails: {
-      name: String,
-      email: String,
-      address: String,
-      phone: String,
-      city: String,
-      country: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    // For bKash / Nagad / Bank Transfer — user provides payment proof
     paymentProof: {
-      transactionId: String,
-      senderNumber: String,
-      screenshot: {
-        url: String,
-        publicId: String,
-      },
-      bankName: String,
-      accountNumber: String,
-      branchName: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     meta: {
-      type: mongoose.Schema.Types.Mixed,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     invoice: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Invoice",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
-    refundedAt: Date,
-    refundAmount: Number,
-    paidAt: Date,
   },
-  { timestamps: true }
+  {
+    tableName: "payments",
+    timestamps: true,
+  }
 );
 
-paymentSchema.index({ user: 1 });
-paymentSchema.index({ status: 1 });
-paymentSchema.index({ transactionId: 1 });
+enhanceModel(Payment);
 
-module.exports = mongoose.model("Payment", paymentSchema);
+module.exports = Payment;

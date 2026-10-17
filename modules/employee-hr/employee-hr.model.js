@@ -1,73 +1,161 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const attendanceSchema = new mongoose.Schema(
+const Attendance = sequelize.define(
+  "Attendance",
   {
-    employeeName: { type: String, required: true },
-    role: { type: String, default: "Staff" },
-    date: { type: String, required: true },
-    status: {
-      type: String,
-      enum: ["present", "late", "absent", "leave"],
-      default: "present",
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    inTime: { type: String, default: "09:00 AM" },
-    outTime: { type: String, default: "06:00 PM" },
-    notes: { type: String, default: "" },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
+    employeeName: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    role: {
+      type: DataTypes.STRING(50),
+      defaultValue: "Staff",
+    },
+    date: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING(50),
+      defaultValue: "present",
+    },
+    inTime: {
+      type: DataTypes.STRING(50),
+      defaultValue: "09:00 AM",
+    },
+    outTime: {
+      type: DataTypes.STRING(50),
+      defaultValue: "06:00 PM",
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      defaultValue: "",
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "attendances",
+    timestamps: true,
+  }
 );
 
-const leaveRequestSchema = new mongoose.Schema(
+const LeaveRequest = sequelize.define(
+  "LeaveRequest",
   {
-    employeeName: { type: String, required: true },
-    role: { type: String, default: "Staff" },
-    type: { type: String, required: true }, // Sick Leave, Casual Leave, etc.
-    from: { type: String, required: true },
-    to: { type: String, required: true },
-    days: { type: Number, default: 1 },
-    status: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    reason: { type: String, required: true },
-  },
-  { timestamps: true }
-);
-
-const ledgerTransactionSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    category: {
-      type: String,
-      enum: [
-        "salary",
-        "investment",
-        "office_rent",
-        "server_software",
-        "equipment",
-        "client_revenue",
-        "marketing",
-        "other",
-      ],
-      default: "salary",
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
+    employeeName: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    role: {
+      type: DataTypes.STRING(50),
+      defaultValue: "Staff",
     },
     type: {
-      type: String,
-      enum: ["debit", "credit"],
-      required: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
-    amount: { type: Number, required: true },
-    date: { type: String, required: true },
-    status: { type: String, default: "completed" },
-    note: { type: String, default: "" },
+    from: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    to: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    days: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+    },
+    status: {
+      type: DataTypes.STRING(50),
+      defaultValue: "pending",
+    },
+    reason: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "leave_requests",
+    timestamps: true,
+  }
 );
 
-const Attendance = mongoose.model("Attendance", attendanceSchema);
-const LeaveRequest = mongoose.model("LeaveRequest", leaveRequestSchema);
-const LedgerTransaction = mongoose.model("LedgerTransaction", ledgerTransactionSchema);
+const LedgerTransaction = sequelize.define(
+  "LedgerTransaction",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
+    title: {
+      type: DataTypes.STRING(200),
+      allowNull: false,
+    },
+    category: {
+      type: DataTypes.STRING(50),
+      defaultValue: "salary",
+    },
+    type: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    amount: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    date: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING(50),
+      defaultValue: "completed",
+    },
+    note: {
+      type: DataTypes.TEXT,
+      defaultValue: "",
+    },
+  },
+  {
+    tableName: "ledger_transactions",
+    timestamps: true,
+  }
+);
+
+enhanceModel(Attendance);
+enhanceModel(LeaveRequest);
+enhanceModel(LedgerTransaction);
 
 module.exports = {
   Attendance,

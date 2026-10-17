@@ -1,105 +1,110 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const offerSchema = new mongoose.Schema(
+const Offer = sequelize.define(
+  "Offer",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: [true, "Offer title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(191),
       unique: true,
-      trim: true,
-      lowercase: true,
     },
     description: {
-      type: String,
-      default: "",
-      maxlength: 1000,
+      type: DataTypes.TEXT,
+      defaultValue: "",
     },
     shortDescription: {
-      type: String,
-      default: "",
-      maxlength: 300,
+      type: DataTypes.STRING(500),
+      defaultValue: "",
     },
     badge: {
-      type: String,
-      default: "Limited Time",
+      type: DataTypes.STRING(100),
+      defaultValue: "Limited Time",
     },
     discountType: {
-      type: String,
-      enum: ["percentage", "fixed", "bogo"],
-      default: "percentage",
+      type: DataTypes.STRING(50),
+      defaultValue: "percentage",
     },
     discountValue: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     couponCode: {
-      type: String,
-      default: "",
-      trim: true,
-      uppercase: true,
+      type: DataTypes.STRING(100),
+      defaultValue: "",
     },
-    courses: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Course",
-      },
-    ],
+    courses: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     bannerImage: {
-      url: { type: String, default: "" },
-      publicId: { type: String, default: "" },
+      type: DataTypes.JSON,
+      defaultValue: { url: "", publicId: "" },
     },
     startDate: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     endDate: {
-      type: Date,
+      type: DataTypes.DATE,
+      defaultValue: null,
     },
     isActive: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     isFeatured: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     priority: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     usageLimit: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     usedCount: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     termsAndConditions: {
-      type: String,
-      default: "",
+      type: DataTypes.TEXT,
+      defaultValue: "",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "offers",
+    timestamps: true,
+    hooks: {
+      beforeSave: (offer) => {
+        if (!offer.slug || offer.changed("title")) {
+          offer.slug = offer.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+        }
+      },
+    },
+  }
 );
 
-offerSchema.pre("save", function (next) {
-  if (!this.slug || this.isModified("title")) {
-    this.slug = this.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  }
-  next();
-});
+enhanceModel(Offer);
 
-offerSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
-offerSchema.index({ isFeatured: 1 });
-
-const Offer = mongoose.model("Offer", offerSchema);
 module.exports = Offer;

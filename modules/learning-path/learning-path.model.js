@@ -1,82 +1,80 @@
-const mongoose = require("mongoose");
-const { slugify } = require("../../utils/helpers");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const learningPathSchema = new mongoose.Schema(
+const LearningPath = sequelize.define(
+  "LearningPath",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: [true, "Learning path title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(200),
       unique: true,
     },
     description: {
-      type: String,
+      type: DataTypes.TEXT,
+      defaultValue: null,
     },
     shortDescription: {
-      type: String,
-      maxlength: 300,
+      type: DataTypes.STRING(300),
+      defaultValue: null,
     },
     image: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    courses: [
-      {
-        course: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Course",
-          required: true,
-        },
-        order: {
-          type: Number,
-          required: true,
-        },
-      },
-    ],
+    courses: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     difficulty: {
-      type: String,
-      enum: ["beginner", "intermediate", "advanced"],
-      default: "beginner",
+      type: DataTypes.STRING(50),
+      defaultValue: "beginner",
     },
     estimatedDuration: {
-      type: String,
+      type: DataTypes.STRING(100),
+      defaultValue: null,
     },
     category: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING(100),
+      defaultValue: null,
     },
-    tags: [String],
+    tags: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     enrolledStudents: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     isFeatured: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
-    status: {
-      type: String,
-      enum: ["draft", "published", "archived"],
-      default: "draft",
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "learning_paths",
+    timestamps: true,
+  }
 );
 
-learningPathSchema.pre("save", function (next) {
-  if (this.isModified("title")) {
-    this.slug = slugify(this.title);
-  }
-  next();
-});
+enhanceModel(LearningPath);
 
-learningPathSchema.index({ title: "text", description: "text" });
-learningPathSchema.index({ status: 1 });
-learningPathSchema.index({ category: 1 });
-learningPathSchema.index({ difficulty: 1 });
-
-module.exports = mongoose.model("LearningPath", learningPathSchema);
+module.exports = LearningPath;

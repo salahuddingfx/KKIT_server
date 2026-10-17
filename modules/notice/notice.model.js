@@ -1,88 +1,84 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const noticeSchema = new mongoose.Schema(
+const Notice = sequelize.define(
+  "Notice",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: [true, "Notice title is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     content: {
-      type: String,
-      required: [true, "Notice content is required"],
+      type: DataTypes.TEXT("long"),
+      allowNull: false,
     },
     type: {
-      type: String,
-      enum: ["info", "warning", "urgent", "maintenance", "general"],
-      default: "general",
+      type: DataTypes.STRING(50),
+      defaultValue: "general",
     },
     priority: {
-      type: String,
-      enum: ["low", "medium", "high", "critical"],
-      default: "medium",
+      type: DataTypes.STRING(50),
+      defaultValue: "medium",
     },
     targetAudience: {
-      type: String,
-      enum: ["all", "students", "instructors", "admins"],
-      default: "all",
+      type: DataTypes.STRING(50),
+      defaultValue: "all",
     },
-    targetCourses: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Course",
-      },
-    ],
+    targetCourses: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     classLink: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING(255),
+      defaultValue: null,
     },
     classSchedule: {
-      type: Date,
+      type: DataTypes.DATE,
+      defaultValue: null,
     },
     author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     isActive: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     isPinned: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     expiresAt: {
-      type: Date,
-      default: null,
+      type: DataTypes.DATE,
+      defaultValue: null,
     },
-    attachments: [
-      {
-        url: String,
-        publicId: String,
-        name: String,
-        type: String,
-      },
-    ],
-    readBy: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        readAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+    attachments: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    readBy: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "notices",
+    timestamps: true,
+  }
 );
 
-noticeSchema.index({ title: "text", content: "text" });
-noticeSchema.index({ isActive: 1, isPinned: -1, createdAt: -1 });
-noticeSchema.index({ targetAudience: 1 });
+enhanceModel(Notice);
 
-module.exports = mongoose.model("Notice", noticeSchema);
+module.exports = Notice;

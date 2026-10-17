@@ -1,12 +1,17 @@
-const mongoose = require("mongoose");
+const sequelize = require("./sequelize");
 const env = require("./env");
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(env.MONGODB_URI);
-    return conn.connection.host;
+    await sequelize.authenticate();
+    console.log("  MySQL / MariaDB connected successfully!");
+    
+    // Auto-sync MySQL models
+    await sequelize.sync({ alter: false });
+
+    return sequelize.config.host || "localhost";
   } catch (error) {
-    console.error("MongoDB connection error:", error.message);
+    console.error("Database connection error:", error.message);
     process.exit(1);
   }
 };

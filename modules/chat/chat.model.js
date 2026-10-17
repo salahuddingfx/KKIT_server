@@ -1,37 +1,48 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const chatMessageSchema = new mongoose.Schema(
+const ChatMessage = sequelize.define(
+  "ChatMessage",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     room: {
-      type: String,
-      required: true,
-      index: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     sender: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     content: {
-      type: String,
-      required: true,
-      maxlength: 5000,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     type: {
-      type: String,
-      enum: ["text", "image", "file", "system"],
-      default: "text",
+      type: DataTypes.STRING(50),
+      defaultValue: "text",
     },
-    readBy: [
-      {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        readAt: { type: Date, default: Date.now },
-      },
-    ],
+    readBy: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "chat_messages",
+    timestamps: true,
+  }
 );
 
-chatMessageSchema.index({ room: 1, createdAt: -1 });
+enhanceModel(ChatMessage);
 
-module.exports = mongoose.model("ChatMessage", chatMessageSchema);
+module.exports = ChatMessage;

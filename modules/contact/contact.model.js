@@ -1,49 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const contactSchema = new mongoose.Schema(
+const Contact = sequelize.define(
+  "Contact",
   {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      lowercase: true,
-      trim: true,
-    },
-    phone: String,
-    subject: {
-      type: String,
-      required: true,
-    },
-    message: {
-      type: String,
-      required: [true, "Message is required"],
-    },
-    status: {
-      type: String,
-      enum: ["unread", "read", "replied", "archived"],
-      default: "unread",
-    },
-    reply: {
-      message: String,
-      repliedAt: Date,
-      repliedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
       },
     },
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING(191),
+      allowNull: false,
+    },
+    phone: {
+      type: DataTypes.STRING(50),
+      defaultValue: null,
+    },
+    subject: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    message: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING(50),
+      defaultValue: "unread",
+    },
+    reply: {
+      type: DataTypes.JSON,
+      defaultValue: null,
+    },
     source: {
-      type: String,
-      default: "website",
+      type: DataTypes.STRING(50),
+      defaultValue: "website",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "contacts",
+    timestamps: true,
+  }
 );
 
-contactSchema.index({ status: 1 });
-contactSchema.index({ email: 1 });
+enhanceModel(Contact);
 
-module.exports = mongoose.model("Contact", contactSchema);
+module.exports = Contact;

@@ -1,44 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const enrollmentSchema = new mongoose.Schema(
+const Enrollment = sequelize.define(
+  "Enrollment",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     status: {
-      type: String,
-      enum: ["pending", "active", "completed", "cancelled", "expired"],
-      default: "pending",
+      type: DataTypes.STRING(50),
+      defaultValue: "pending",
     },
     payment: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Payment",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
     progress: {
-      completedLessons: { type: Number, default: 0 },
-      totalLessons: { type: Number, default: 0 },
-      percentage: { type: Number, default: 0 },
+      type: DataTypes.JSON,
+      defaultValue: { completedLessons: 0, totalLessons: 0, percentage: 0 },
     },
-    completedAt: Date,
-    expiresAt: Date,
+    completedAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
+    expiresAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     certificate: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Certificate",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "enrollments",
+    timestamps: true,
+  }
 );
 
-enrollmentSchema.index({ user: 1, course: 1 }, { unique: true });
-enrollmentSchema.index({ user: 1 });
-enrollmentSchema.index({ course: 1 });
-enrollmentSchema.index({ status: 1 });
+enhanceModel(Enrollment);
 
-module.exports = mongoose.model("Enrollment", enrollmentSchema);
+module.exports = Enrollment;

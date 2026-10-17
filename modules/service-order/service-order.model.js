@@ -1,90 +1,86 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const serviceOrderSchema = new mongoose.Schema(
+const ServiceOrder = sequelize.define(
+  "ServiceOrder",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     orderNumber: {
-      type: String,
+      type: DataTypes.STRING(100),
       unique: true,
-      required: true,
+      allowNull: false,
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     service: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Service",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
     serviceName: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     tier: {
-      type: String,
-      enum: ["basic", "pro", "enterprise"],
-      default: "basic",
+      type: DataTypes.STRING(50),
+      defaultValue: "basic",
     },
-    customAddons: [
-      {
-        name: String,
-        price: Number,
-      },
-    ],
+    customAddons: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     brief: {
-      type: String,
-      required: true,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
-    attachments: [
-      {
-        url: String,
-        name: String,
-      },
-    ],
+    attachments: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     totalAmount: {
-      type: Number,
-      required: true,
-      min: 0,
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
     },
     depositAmount: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     paymentMethod: {
-      type: String,
-      enum: ["bkash", "nagad", "bank_transfer", "manual", "card"],
-      default: "bkash",
+      type: DataTypes.STRING(50),
+      defaultValue: "bkash",
     },
-    transactionId: String,
+    transactionId: {
+      type: DataTypes.STRING(255),
+      defaultValue: null,
+    },
     paymentStatus: {
-      type: String,
-      enum: ["pending", "deposit_paid", "completed", "cancelled", "refunded"],
-      default: "pending",
+      type: DataTypes.STRING(50),
+      defaultValue: "pending",
     },
-    projectStatus: {
-      type: String,
-      enum: ["pending_review", "in_progress", "revision", "delivered", "completed", "cancelled"],
-      default: "pending_review",
+    orderStatus: {
+      type: DataTypes.STRING(50),
+      defaultValue: "pending",
     },
-    deliverables: [
-      {
-        title: String,
-        fileUrl: String,
-        notes: String,
-        deliveredAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
-    deliveryDeadline: Date,
-    adminNotes: String,
   },
-  { timestamps: true }
+  {
+    tableName: "service_orders",
+    timestamps: true,
+  }
 );
 
-serviceOrderSchema.index({ user: 1 });
-serviceOrderSchema.index({ paymentStatus: 1 });
-serviceOrderSchema.index({ projectStatus: 1 });
+enhanceModel(ServiceOrder);
 
-module.exports = mongoose.model("ServiceOrder", serviceOrderSchema);
+module.exports = ServiceOrder;

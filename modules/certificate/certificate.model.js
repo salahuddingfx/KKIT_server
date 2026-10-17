@@ -1,58 +1,73 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 const { generateCertificateNumber } = require("../../utils/helpers");
 
-const certificateSchema = new mongoose.Schema(
+const Certificate = sequelize.define(
+  "Certificate",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     certificateNumber: {
-      type: String,
+      type: DataTypes.STRING(100),
       unique: true,
-      required: true,
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     enrollment: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Enrollment",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
     studentName: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     courseName: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     completionDate: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
-    pdfUrl: String,
+    pdfUrl: {
+      type: DataTypes.STRING(500),
+      defaultValue: null,
+    },
     status: {
-      type: String,
-      enum: ["active", "revoked"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
   },
-  { timestamps: true }
+  {
+    tableName: "certificates",
+    timestamps: true,
+    hooks: {
+      beforeCreate: async (cert) => {
+        if (!cert.certificateNumber) {
+          const count = await Certificate.count();
+          cert.certificateNumber = generateCertificateNumber ? generateCertificateNumber(count + 1) : `CERT-${Date.now()}`;
+        }
+      },
+    },
+  }
 );
 
-certificateSchema.pre("save", async function (next) {
-  if (!this.certificateNumber) {
-    const count = await mongoose.model("Certificate").countDocuments();
-    this.certificateNumber = generateCertificateNumber(count + 1);
-  }
-  next();
-});
+enhanceModel(Certificate);
 
-certificateSchema.index({ user: 1 });
-certificateSchema.index({ course: 1 });
-
-module.exports = mongoose.model("Certificate", certificateSchema);
+module.exports = Certificate;

@@ -1,46 +1,57 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
 const crypto = require("crypto");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const webhookSchema = new mongoose.Schema(
+const Webhook = sequelize.define(
+  "Webhook",
   {
-    url: {
-      type: String,
-      required: true,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
-    events: [
-      {
-        type: String,
-        enum: [
-          "user.registered",
-          "payment.completed",
-          "payment.failed",
-          "course.enrolled",
-          "course.completed",
-          "certificate.generated",
-          "subscription.created",
-          "subscription.cancelled",
-        ],
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
       },
-    ],
+    },
+    url: {
+      type: DataTypes.STRING(500),
+      allowNull: false,
+    },
+    events: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     secret: {
-      type: String,
-      default: () => crypto.randomBytes(32).toString("hex"),
+      type: DataTypes.STRING(100),
+      defaultValue: () => crypto.randomBytes(32).toString("hex"),
     },
     active: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
-    lastTriggered: Date,
+    lastTriggered: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     failureCount: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "webhooks",
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("Webhook", webhookSchema);
+enhanceModel(Webhook);
+
+module.exports = Webhook;

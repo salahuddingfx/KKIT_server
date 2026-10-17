@@ -1,75 +1,104 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 const { slugify } = require("../../utils/helpers");
 
-const teamSchema = new mongoose.Schema(
+const Team = sequelize.define(
+  "Team",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-      maxlength: 100,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(191),
       unique: true,
-      index: true,
     },
     designation: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
-    department: String,
+    department: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
     bio: {
-      type: String,
-      maxlength: 500,
+      type: DataTypes.STRING(500),
+      defaultValue: null,
     },
     avatar: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     email: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING(191),
+      defaultValue: null,
     },
-    phone: String,
+    phone: {
+      type: DataTypes.STRING(50),
+      defaultValue: null,
+    },
     socialLinks: {
-      facebook: String,
-      linkedin: String,
-      twitter: String,
-      github: String,
-      website: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    skills: [String],
-    experience: String,
-    projects: Number,
-    highlights: [String],
+    skills: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    experience: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
+    projects: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    highlights: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     isDeveloper: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "teams",
+    timestamps: true,
+    hooks: {
+      beforeSave: (team) => {
+        if (!team.slug || team.changed("name")) {
+          team.slug = slugify(team.name);
+        }
+      },
+    },
+  }
 );
 
-teamSchema.pre("save", function (next) {
-  if (this.isModified("name")) {
-    this.slug = slugify(this.name);
-  }
-  next();
-});
+enhanceModel(Team);
 
-module.exports = mongoose.model("Team", teamSchema);
+module.exports = Team;

@@ -1,39 +1,52 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const faqSchema = new mongoose.Schema(
+const Faq = sequelize.define(
+  "Faq",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     question: {
-      type: String,
-      required: [true, "Question is required"],
-      trim: true,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     answer: {
-      type: String,
-      required: [true, "Answer is required"],
+      type: DataTypes.TEXT("long"),
+      allowNull: false,
     },
     category: {
-      type: String,
-      default: "general",
-      trim: true,
+      type: DataTypes.STRING(100),
+      defaultValue: "general",
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     views: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "faqs",
+    timestamps: true,
+  }
 );
 
-faqSchema.index({ category: 1 });
-faqSchema.index({ status: 1 });
+enhanceModel(Faq);
 
-module.exports = mongoose.model("Faq", faqSchema);
+module.exports = Faq;

@@ -1,49 +1,65 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const referralSchema = new mongoose.Schema(
+const Referral = sequelize.define(
+  "Referral",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     referrer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     referredUser: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
     referralCode: {
-      type: String,
+      type: DataTypes.STRING(100),
+      allowNull: false,
       unique: true,
-      required: true,
     },
     status: {
-      type: String,
-      enum: ["pending", "completed", "rewarded"],
-      default: "pending",
+      type: DataTypes.STRING(50),
+      defaultValue: "pending",
     },
     purchaseAmount: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     commission: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     commissionRate: {
-      type: Number,
-      default: 10,
+      type: DataTypes.FLOAT,
+      defaultValue: 10,
     },
-    rewardedAt: Date,
+    rewardedAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     paymentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Payment",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "referrals",
+    timestamps: true,
+  }
 );
 
-referralSchema.index({ referrer: 1 });
-referralSchema.index({ referralCode: 1 });
-referralSchema.index({ referredUser: 1 });
+enhanceModel(Referral);
 
-module.exports = mongoose.model("Referral", referralSchema);
+module.exports = Referral;

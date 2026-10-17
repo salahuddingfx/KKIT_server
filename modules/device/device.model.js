@@ -1,40 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const deviceSessionSchema = new mongoose.Schema(
+const DeviceSession = sequelize.define(
+  "DeviceSession",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.JSON,
+      allowNull: false,
     },
     fingerprint: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
-    userAgent: String,
-    ip: String,
+    userAgent: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    ip: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
     deviceInfo: {
-      browser: String,
-      os: String,
-      device: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     isActive: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     lastActivity: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     expiresAt: {
-      type: Date,
-      required: true,
+      type: DataTypes.DATE,
+      allowNull: false,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "device_sessions",
+    timestamps: true,
+  }
 );
 
-deviceSessionSchema.index({ user: 1, isActive: 1 });
-deviceSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+enhanceModel(DeviceSession);
 
-module.exports = mongoose.model("DeviceSession", deviceSessionSchema);
+module.exports = DeviceSession;

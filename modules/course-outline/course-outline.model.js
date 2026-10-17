@@ -1,46 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const courseOutlineRequestSchema = new mongoose.Schema(
+const CourseOutlineRequest = sequelize.define(
+  "CourseOutlineRequest",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     courseName: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     name: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     email: {
-      type: String,
-      required: true,
-      lowercase: true,
-      trim: true,
+      type: DataTypes.STRING(191),
+      allowNull: false,
     },
     phone: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING(50),
+      allowNull: false,
     },
     whatsapp: {
-      type: String,
+      type: DataTypes.STRING(50),
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["pending", "sent", "failed"],
-      default: "pending",
+      type: DataTypes.STRING(50),
+      defaultValue: "pending",
     },
-    sentAt: Date,
+    sentAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "course_outline_requests",
+    timestamps: true,
+  }
 );
 
-courseOutlineRequestSchema.index({ course: 1 });
-courseOutlineRequestSchema.index({ email: 1 });
-courseOutlineRequestSchema.index({ createdAt: 1 });
+enhanceModel(CourseOutlineRequest);
 
-module.exports = mongoose.model("CourseOutlineRequest", courseOutlineRequestSchema);
+module.exports = CourseOutlineRequest;

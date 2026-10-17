@@ -1,134 +1,158 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const env = require("../../config/env");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const userSchema = new mongoose.Schema(
+const User = sequelize.define(
+  "User",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-      maxlength: 100,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     email: {
-      type: String,
-      required: [true, "Email is required"],
+      type: DataTypes.STRING(191),
+      allowNull: false,
       unique: true,
-      lowercase: true,
-      trim: true,
+      validate: {
+        isEmail: true,
+      },
     },
     password: {
-      type: String,
-      required: [true, "Password is required"],
-      minlength: 6,
-      select: false,
+      type: DataTypes.STRING(255),
+      allowNull: false,
     },
     phone: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING(50),
+      defaultValue: null,
     },
     avatar: {
-      url: String,
-      publicId: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     role: {
-      type: String,
-      default: "user",
+      type: DataTypes.STRING(50),
+      defaultValue: "user",
     },
     isActive: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
     isEmailVerified: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     bio: {
-      type: String,
-      maxlength: 500,
+      type: DataTypes.STRING(500),
+      defaultValue: null,
     },
     designation: {
-      type: String,
-      trim: true,
-      maxlength: 100,
+      type: DataTypes.STRING(100),
+      defaultValue: null,
     },
     socialLinks: {
-      facebook: String,
-      linkedin: String,
-      twitter: String,
-      github: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    enrolledCourses: [
-      {
-        course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
-        enrolledAt: { type: Date, default: Date.now },
-        status: { type: String, enum: ["active", "completed", "cancelled"], default: "active" },
-      },
-    ],
-    completedLessons: [
-      {
-        course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
-        lesson: { type: mongoose.Schema.Types.Mixed },
-        completedAt: { type: Date, default: Date.now },
-      },
-    ],
-    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
-    passwordResetToken: String,
-    passwordResetExpire: Date,
-    refreshToken: String,
-    lastLogin: Date,
+    enrolledCourses: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    completedLessons: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    wishlist: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    passwordResetToken: {
+      type: DataTypes.STRING(255),
+      defaultValue: null,
+    },
+    passwordResetExpire: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
+    refreshToken: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    lastLogin: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     loginCount: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
-    loginHistory: [
-      {
-        date: { type: Date, default: Date.now },
-      },
-    ],
-    fcmTokens: [
-      {
-        type: String,
-      },
-    ],
-    otpCode: String,
-    otpExpire: Date,
-    otpPurpose: String,
+    loginHistory: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    fcmTokens: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    otpCode: {
+      type: DataTypes.STRING(50),
+      defaultValue: null,
+    },
+    otpExpire: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
+    otpPurpose: {
+      type: DataTypes.STRING(50),
+      defaultValue: null,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "users",
+    timestamps: true,
+    hooks: {
+      beforeSave: async (user) => {
+        if (user.changed("password")) {
+          user.password = await bcrypt.hash(user.password, 12);
+        }
+      },
+    },
+  }
 );
 
-userSchema.index({ role: 1 });
-userSchema.index({ isActive: 1 });
-
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
-
-userSchema.methods.comparePassword = async function (candidatePassword) {
+User.prototype.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-userSchema.methods.generateAccessToken = function () {
-  return jwt.sign({ id: this._id, role: this.role }, env.JWT_SECRET, {
+User.prototype.generateAccessToken = function () {
+  return jwt.sign({ id: this.id || this._id, role: this.role }, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRE,
   });
 };
 
-userSchema.methods.generateRefreshToken = function () {
-  return jwt.sign({ id: this._id }, env.JWT_REFRESH_SECRET, {
+User.prototype.generateRefreshToken = function () {
+  return jwt.sign({ id: this.id || this._id }, env.JWT_REFRESH_SECRET, {
     expiresIn: env.JWT_REFRESH_EXPIRE,
   });
 };
 
-module.exports = mongoose.model("User", userSchema);
+enhanceModel(User);
+
+module.exports = User;

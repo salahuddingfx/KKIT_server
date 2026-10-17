@@ -1,62 +1,84 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 const { INVOICE_STATUS } = require("../../utils/constants");
 
-const invoiceSchema = new mongoose.Schema(
+const Invoice = sequelize.define(
+  "Invoice",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     invoiceNumber: {
-      type: String,
+      type: DataTypes.STRING(100),
       unique: true,
-      required: true,
+      allowNull: false,
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
     payment: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Payment",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
     amount: {
-      type: Number,
-      required: true,
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
     },
     tax: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     total: {
-      type: Number,
-      required: true,
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
     },
     status: {
-      type: String,
-      enum: Object.values(INVOICE_STATUS),
-      default: INVOICE_STATUS.PENDING,
+      type: DataTypes.STRING(50),
+      defaultValue: INVOICE_STATUS ? INVOICE_STATUS.PENDING : "pending",
     },
-    paymentMethod: String,
+    paymentMethod: {
+      type: DataTypes.STRING(50),
+      defaultValue: null,
+    },
     billingDetails: {
-      name: String,
-      email: String,
-      address: String,
-      phone: String,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
-    items: [
-      {
-        description: String,
-        amount: Number,
-      },
-    ],
-    pdfUrl: String,
-    paidAt: Date,
+    items: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    pdfUrl: {
+      type: DataTypes.STRING(500),
+      defaultValue: null,
+    },
+    paidAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "invoices",
+    timestamps: true,
+  }
 );
 
-invoiceSchema.index({ user: 1 });
+enhanceModel(Invoice);
 
-module.exports = mongoose.model("Invoice", invoiceSchema);
+module.exports = Invoice;

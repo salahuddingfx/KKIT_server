@@ -1,48 +1,60 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const quizAttemptSchema = new mongoose.Schema(
+const QuizAttempt = sequelize.define(
+  "QuizAttempt",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     quiz: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Quiz",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
-    answers: [
-      {
-        questionIndex: Number,
-        answer: String,
-        isCorrect: Boolean,
-      },
-    ],
+    answers: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     score: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     totalPoints: {
-      type: Number,
-      default: 0,
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
     },
     passed: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     timeSpent: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     attemptedAt: {
-      type: Date,
-      default: Date.now,
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "quiz_attempts",
+    timestamps: true,
+  }
 );
 
-quizAttemptSchema.index({ user: 1, quiz: 1 });
+enhanceModel(QuizAttempt);
 
-module.exports = mongoose.model("QuizAttempt", quizAttemptSchema);
+module.exports = QuizAttempt;

@@ -1,4 +1,3 @@
-const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const env = require("./config/env");
 
@@ -16,11 +15,15 @@ const Category = require("./modules/category/category.model");
 const Partner = require("./modules/partner/partner.model");
 const HomeStat = require("./modules/home-stat/home-stat.model");
 const Offer = require("./modules/offer/offer.model");
+const Role = require("./modules/role/role.model");
+const roleService = require("./modules/role/role.service");
 
 const seedData = async () => {
   try {
-    await mongoose.connect(env.MONGODB_URI);
-    console.log("Connected to MongoDB");
+    const sequelize = require("./config/sequelize");
+    await sequelize.authenticate();
+    await sequelize.sync({ alter: true });
+    console.log("Connected to MySQL / MariaDB (kkit_db)");
 
     // Clear all
     await Promise.all([
@@ -37,9 +40,13 @@ const seedData = async () => {
       Partner.deleteMany({}),
       HomeStat.deleteMany({}),
       Offer.deleteMany({}),
+      Role.deleteMany({}),
     ]);
-    console.log("Cleared existing data");
-    await Course.collection.dropIndexes().catch(() => {});
+    console.log("Cleared existing data in MySQL");
+
+    // ─── ROLES ────────────────────────────────────────
+    await roleService.seedSystemRoles();
+    console.log("System roles seeded");
 
     // ─── USERS ────────────────────────────────────────
     const admin = await User.create({

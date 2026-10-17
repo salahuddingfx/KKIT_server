@@ -1,49 +1,57 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const roleSchema = new mongoose.Schema(
+const Role = sequelize.define(
+  "Role",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     name: {
-      type: String,
-      required: [true, "Role name is required"],
-      trim: true,
-      maxlength: 100,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     slug: {
-      type: String,
-      required: [true, "Role slug is required"],
+      type: DataTypes.STRING(100),
+      allowNull: false,
       unique: true,
-      lowercase: true,
-      trim: true,
     },
     description: {
-      type: String,
-      trim: true,
-      maxlength: 500,
+      type: DataTypes.STRING(500),
+      defaultValue: null,
     },
-    allowedPages: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-    permissions: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
+    allowedPages: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    permissions: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     isSystem: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     isActive: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "roles",
+    timestamps: true,
+  }
 );
 
-roleSchema.index({ isActive: 1 });
+enhanceModel(Role);
 
-module.exports = mongoose.model("Role", roleSchema);
+module.exports = Role;

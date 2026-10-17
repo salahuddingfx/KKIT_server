@@ -1,59 +1,77 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 const { slugify } = require("../../utils/helpers");
 
-const pricingSchema = new mongoose.Schema(
+const Pricing = sequelize.define(
+  "Pricing",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     name: {
-      type: String,
-      required: [true, "Plan name is required"],
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(191),
       unique: true,
     },
     price: {
-      type: Number,
-      required: true,
-      min: 0,
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
     },
     period: {
-      type: String,
-      default: "month",
+      type: DataTypes.STRING(50),
+      defaultValue: "month",
     },
     description: {
-      type: String,
-      maxlength: 300,
+      type: DataTypes.STRING(500),
+      defaultValue: null,
     },
-    features: [
-      {
-        text: { type: String, required: true },
-        included: { type: Boolean, default: true },
-      },
-    ],
+    features: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     isPopular: {
-      type: Boolean,
-      default: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
-    badge: String,
+    badge: {
+      type: DataTypes.STRING(100),
+      defaultValue: null,
+    },
   },
-  { timestamps: true }
+  {
+    tableName: "pricings",
+    timestamps: true,
+    hooks: {
+      beforeSave: (pricing) => {
+        if (!pricing.slug || pricing.changed("name")) {
+          pricing.slug = slugify(pricing.name);
+        }
+      },
+    },
+  }
 );
 
-pricingSchema.pre("save", function (next) {
-  if (this.isModified("name")) {
-    this.slug = slugify(this.name);
-  }
-  next();
-});
+enhanceModel(Pricing);
 
-module.exports = mongoose.model("Pricing", pricingSchema);
+module.exports = Pricing;

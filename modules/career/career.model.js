@@ -1,57 +1,72 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const careerSchema = new mongoose.Schema(
+const Career = sequelize.define(
+  "Career",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     title: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     slug: {
-      type: String,
+      type: DataTypes.STRING(200),
       unique: true,
     },
     department: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     location: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     type: {
-      type: String,
-      enum: ["full-time", "part-time", "contract", "internship", "remote"],
-      default: "full-time",
+      type: DataTypes.STRING(50),
+      defaultValue: "full-time",
     },
     description: {
-      type: String,
-      required: true,
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
-    requirements: [String],
-    responsibilities: [String],
+    requirements: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    responsibilities: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     salary: {
-      min: Number,
-      max: Number,
-      currency: { type: String, default: "BDT" },
-      period: { type: String, default: "month" },
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["active", "closed", "draft"],
-      default: "active",
+      type: DataTypes.STRING(50),
+      defaultValue: "active",
     },
     order: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "careers",
+    timestamps: true,
+  }
 );
 
-careerSchema.index({ title: "text", department: "text" });
+enhanceModel(Career);
 
-module.exports = mongoose.model("Career", careerSchema);
+module.exports = Career;

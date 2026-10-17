@@ -1,68 +1,80 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../../config/sequelize");
+const { enhanceModel } = require("../../config/sqlAdapter");
 
-const emailCampaignSchema = new mongoose.Schema(
+const EmailCampaign = sequelize.define(
+  "EmailCampaign",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
+    },
     name: {
-      type: String,
-      required: [true, "Campaign name is required"],
-      trim: true,
-      maxlength: 200,
+      type: DataTypes.STRING(200),
+      allowNull: false,
     },
     subject: {
-      type: String,
-      required: [true, "Subject line is required"],
-      trim: true,
-      maxlength: 300,
+      type: DataTypes.STRING(300),
+      allowNull: false,
     },
     content: {
-      type: String,
-      required: [true, "Email content is required"],
+      type: DataTypes.TEXT,
+      allowNull: false,
     },
     template: {
-      type: String,
-      enum: ["promotional", "welcome", "announcement", "custom"],
-      default: "custom",
+      type: DataTypes.STRING(50),
+      defaultValue: "custom",
     },
     targetAudience: {
-      type: String,
-      enum: ["all", "students", "instructors", "leads", "custom"],
-      default: "all",
+      type: DataTypes.STRING(50),
+      defaultValue: "all",
     },
     targetFilters: {
-      role: String,
-      course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
-      enrolledAfter: Date,
-      enrolledBefore: Date,
+      type: DataTypes.JSON,
+      defaultValue: null,
     },
     status: {
-      type: String,
-      enum: ["draft", "scheduled", "sending", "sent", "failed"],
-      default: "draft",
+      type: DataTypes.STRING(50),
+      defaultValue: "draft",
     },
-    scheduledAt: Date,
-    sentAt: Date,
+    scheduledAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
+    sentAt: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+    },
     totalSent: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     totalOpened: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     totalClicked: {
-      type: Number,
-      default: 0,
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: DataTypes.INTEGER,
+      defaultValue: null,
     },
   },
-  { timestamps: true }
+  {
+    tableName: "email_campaigns",
+    timestamps: true,
+  }
 );
 
-emailCampaignSchema.index({ status: 1 });
-emailCampaignSchema.index({ createdBy: 1 });
-emailCampaignSchema.index({ scheduledAt: 1, status: 1 });
+enhanceModel(EmailCampaign);
 
-module.exports = mongoose.model("EmailCampaign", emailCampaignSchema);
+module.exports = EmailCampaign;
