@@ -12,9 +12,13 @@ const { apiLimiter } = require("./middleware/rateLimiter");
 const routes = require("./routes/index");
 const { statsMiddleware } = require("./middleware/stats");
 const { auditMiddleware } = require("./middleware/audit.middleware");
+const { activeWafMiddleware, hppGuard } = require("./middleware/security");
 const renderDashboard = require("./utils/dashboard");
 
 const app = express();
+
+// Disable Express fingerprint
+app.disable("x-powered-by");
 
 // Stats tracker & Audit Log tracker (must be first)
 app.use(statsMiddleware);
@@ -30,16 +34,10 @@ app.use(
 );
 app.use(cors(corsOptions));
 
-// Serve uploaded files statically with explicit cross-origin headers
-app.use(
-  "/uploads",
-  (req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-    next();
-  },
-  express.static(path.join(__dirname, "public/uploads"))
-);
+const { secureUploadsHandler } = require("./middleware/secureUploads");
+
+// Secure upload handler: Authentication for sensitive folders & Web-Only Anti-Hotlinking
+app.use("/uploads", cookieParser(), secureUploadsHandler);
 
 // Dashboard — served before rate limiter so it's always accessible
 app.get("/", renderDashboard);
@@ -51,6 +49,10 @@ app.use("/api/v1", apiLimiter);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
+
+// Parameter pollution guard & Active WAF protection
+app.use(hppGuard);
+app.use(activeWafMiddleware);
 
 // Compression
 app.use(compression());

@@ -37,6 +37,31 @@ const rejectBlog = catchAsync(async (req, res) => {
   ApiResponse.success(res, blog, "Blog rejected");
 });
 
+const addReaction = catchAsync(async (req, res) => {
+  const result = await blogService.addReaction(req.params.slug, req.body.type);
+  ApiResponse.success(res, result, "Reaction recorded");
+});
+
+const getComments = catchAsync(async (req, res) => {
+  const comments = await blogService.getComments(req.params.slug);
+  ApiResponse.success(res, comments, "Comments retrieved");
+});
+
+const addComment = catchAsync(async (req, res) => {
+  const result = await blogService.addComment(req.params.slug, req.body, req.user);
+  ApiResponse.created(res, result, "Comment posted successfully");
+});
+
+const likeComment = catchAsync(async (req, res) => {
+  const result = await blogService.likeComment(req.params.slug, req.params.commentId);
+  ApiResponse.success(res, result, "Comment liked");
+});
+
+const getRelatedBlogs = catchAsync(async (req, res) => {
+  const blogs = await blogService.getRelatedBlogs(req.params.slug);
+  ApiResponse.success(res, blogs, "Related articles retrieved");
+});
+
 const deleteBlog = catchAsync(async (req, res) => {
   await blogService.deleteBlog(req.params.id);
   ApiResponse.noContent(res);
@@ -46,9 +71,15 @@ module.exports = {
   getAllBlogs,
   getMyBlogs,
   getBlogBySlug,
+  addReaction,
+  getComments,
+  addComment,
+  likeComment,
+  getRelatedBlogs,
   createBlog,
   updateBlog,
   approveBlog,
   rejectBlog,
   deleteBlog,
 };
+

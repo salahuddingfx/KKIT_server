@@ -10,6 +10,11 @@ const { createBlogSchema, updateBlogSchema } = require("./blog.validation");
 router.get("/", optionalAuth, blogController.getAllBlogs);
 router.get("/my-blogs", protect, blogController.getMyBlogs);
 router.get("/:slug", optionalAuth, blogController.getBlogBySlug);
+router.get("/:slug/comments", optionalAuth, blogController.getComments);
+router.post("/:slug/comments", optionalAuth, blogController.addComment);
+router.post("/:slug/comments/:commentId/like", optionalAuth, blogController.likeComment);
+router.post("/:slug/reactions", optionalAuth, blogController.addReaction);
+router.get("/:slug/related", optionalAuth, blogController.getRelatedBlogs);
 
 // User submission route (any authenticated student/user can submit)
 router.post("/", protect, validate(createBlogSchema), blogController.createBlog);

@@ -65,6 +65,20 @@ const Blog = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    reactions: {
+      type: DataTypes.JSON,
+      defaultValue: {
+        like: 0,
+        love: 0,
+        fire: 0,
+        clap: 0,
+        insightful: 0,
+      },
+    },
+    comments: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
     featured: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
