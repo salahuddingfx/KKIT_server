@@ -5,6 +5,7 @@ const { authorize } = require("../../middleware/role");
 const ctrl = require("./portfolio.controller");
 
 router.get("/", optionalAuth, ctrl.getAll);
+router.get("/slug/:slug", optionalAuth, ctrl.getBySlug);
 router.get("/:id", optionalAuth, ctrl.getById);
 
 router.use(protect);

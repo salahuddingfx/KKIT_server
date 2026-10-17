@@ -81,6 +81,7 @@ router.use("/service-orders", serviceOrderRoutes);
 router.use("/sms", smsRoutes);
 router.use("/pricing", pricingRoutes);
 router.use("/portfolio", portfolioRoutes);
+router.use("/case-studies", portfolioRoutes);
 router.use("/team", teamRoutes);
 router.use("/contact", contactRoutes);
 router.use("/testimonials", testimonialRoutes);

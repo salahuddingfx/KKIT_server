@@ -12,6 +12,11 @@ const getById = catchAsync(async (req, res) => {
   ApiResponse.success(res, item);
 });
 
+const getBySlug = catchAsync(async (req, res) => {
+  const item = await service.getBySlug(req.params.slug);
+  ApiResponse.success(res, item);
+});
+
 const create = catchAsync(async (req, res) => {
   const item = await service.create(req.body);
   ApiResponse.created(res, item);
@@ -27,4 +32,4 @@ const remove = catchAsync(async (req, res) => {
   ApiResponse.success(res, null, "Portfolio item deleted");
 });
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getBySlug, create, update, remove };

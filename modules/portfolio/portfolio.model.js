@@ -34,7 +34,7 @@ const Portfolio = sequelize.define(
     },
     projectType: {
       type: DataTypes.STRING(50),
-      defaultValue: "client",
+      defaultValue: "client", // client, student, internal
     },
     category: {
       type: DataTypes.STRING(100),
@@ -76,9 +76,50 @@ const Portfolio = sequelize.define(
       type: DataTypes.JSON,
       defaultValue: null,
     },
+    challenge: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    solution: {
+      type: DataTypes.TEXT,
+      defaultValue: null,
+    },
+    features: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    deliverables: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+    },
+    studentName: {
+      type: DataTypes.STRING(150),
+      defaultValue: null,
+    },
+    courseName: {
+      type: DataTypes.STRING(150),
+      defaultValue: null,
+    },
+    isCaseStudy: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    status: {
+      type: DataTypes.STRING(50),
+      defaultValue: "completed",
+    },
     isFeatured: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    featured: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.isFeatured;
+      },
+      set(val) {
+        this.setDataValue("isFeatured", Boolean(val));
+      },
     },
     isActive: {
       type: DataTypes.BOOLEAN,
